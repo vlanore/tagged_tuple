@@ -30,9 +30,6 @@ license and that you accept its terms.*/
 #include "type_map.hpp"
 using std::string;
 
-template <class Tag, class Type>
-struct field {};
-
 template <class TagMap, class Tuple>
 // tagged tuple class (just a tuple wrapper with added tags and static funcs)
 struct tagged_tuple_t {
@@ -47,7 +44,19 @@ struct tagged_tuple_t {
         constexpr int index = TagMap::template get_index<Tag>();
         return std::get<index>(data);
     }
+
+    template <class Tag>
+    const auto& get() const {
+        constexpr int index = TagMap::template get_index<Tag>();
+        return std::get<index>(data);
+    }
 };
+
+template <class Tag, class Type>
+// to be used in field list declaration
+struct field {};
+
+// type of tagged tuple from field list
 
 // template <class Fields>
 // using tagged_tuple = decltype(helper::make_tagged_tuple_t_type<Fields>());

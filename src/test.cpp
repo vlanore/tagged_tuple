@@ -56,9 +56,14 @@ TEST_CASE("Direct usage of tagged_tuple_t") {
     using namespace type_map;
     using my_map = Map<Pair<alpha, int>, Pair<beta, string>>;
     using my_tuple_t = tagged_tuple_t<my_map, tuple<int, string>>;
+
     my_tuple_t my_tuple{2, "hello"};
     CHECK(my_tuple.get<alpha>() == 2);
     CHECK(my_tuple.get<beta>() == "hello");
+
+    const my_tuple_t my_const_tuple{3, "hi"};
+    CHECK(my_const_tuple.get<alpha>() == 3);
+    CHECK(my_const_tuple.get<beta>() == "hi");
 }
 
 // TEST_CASE("Basic tuple test") {
