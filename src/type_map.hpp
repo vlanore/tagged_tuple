@@ -1,8 +1,8 @@
 /*Copyright or © or Copr. CNRS (2019). Contributors:
 - Vincent Lanore. vincent.lanore@gmail.com
 
-This software is a computer program whose purpose is to provide a set of C++ data structures and
-functions to perform Bayesian inference with MCMC algorithms.
+This software is a computer program whose purpose is to provide header-only library to create tuple
+indexed by type tags.
 
 This software is governed by the CeCILL-C license under French law and abiding by the rules of
 distribution of free software. You can use, modify and/ or redistribute the software under the terms
