@@ -27,89 +27,37 @@ license and that you accept its terms.*/
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
-#include <string>
 #include "type_map.hpp"
-using std::get;
 using std::string;
 
 template <class Tag, class Type>
 struct field {};
 
-template <class Tags, class Tuple>
+template <class TagMap, class Tuple>
+// tagged tuple class (just a tuple wrapper with added tags and static funcs)
 struct tagged_tuple_t {
     Tuple data;
 
     template <class... Args>
+    // constructor that just perfect-forwards arguments to tuple constructor
     tagged_tuple_t(Args&&... args) : data(std::forward<Args>(args)...) {}
 
-    tagged_tuple_t(const tagged_tuple_t<Tags, Tuple>&) = default;
-
-    tagged_tuple_t(tagged_tuple_t<Tags, Tuple>&&) = default;
+    template <class Tag>
+    auto& get() {
+        constexpr int index = TagMap::template get_index<Tag>();
+        return std::get<index>(data);
+    }
 };
 
-namespace helper {  // tag -> index correspondance
-    auto helper(std::tuple<>) { return std::tuple<>(); }
+// template <class Fields>
+// using tagged_tuple = decltype(helper::make_tagged_tuple_t_type<Fields>());
 
-    template <class Tag, class Type, class... Rest>
-    auto helper(tuple<field<Tag, Type>, Rest...>) {
-        return std::tuple_cat(std::make_tuple(Tag()), helper(tuple<Rest...>()));
-    }
+// template <class AddressFirst, class Tags, class Tuple>
+// auto& get(const tagged_tuple_t<Tags, Tuple>& tagged_tuple) {
+//     return get<helper::get_index<AddressFirst>(Tags())>(tagged_tuple.data);
+// }
 
-    template <class... Fields>
-    auto get_tags(tuple<Fields...> fields) {
-        return helper(fields);
-    }
-
-    auto tuple_helper(std::tuple<>) { return std::tuple<>(); }
-
-    template <class Tag, class Type, class... Rest>
-    auto tuple_helper(tuple<field<Tag, Type>, Rest...>) {
-        return std::tuple_cat(std::make_tuple(Type()), tuple_helper(tuple<Rest...>()));
-    }
-
-    template <class... Fields>
-    auto get_tuple(tuple<Fields...> fields) {
-        return tuple_helper(fields);
-    }
-
-    // INDEXES
-    template <int, class Tag>
-    auto index_helper(std::tuple<>) {
-        return std::integral_constant<int, -1>();
-    }
-
-    template <int index, class Tag, class First, class... Rest>
-    auto index_helper(std::tuple<First, Rest...>) {
-        using t_if_same = std::integral_constant<int, index>;
-        using t_if_different = decltype(index_helper<index + 1, Tag>(std::tuple<Rest...>()));
-        using same_type = std::is_same<Tag, First>;
-        return std::conditional_t<same_type::value, t_if_same, t_if_different>();
-    }
-
-    template <class Tag, class... Tags>
-    constexpr auto get_index(std::tuple<Tags...> tags) {
-        using result = decltype(index_helper<0, Tag>(tags));
-        static_assert(result::value != -1, "Tag not found");
-        return result::value;
-    }
-
-    template <class Fields>
-    auto make_tagged_tuple_t_type() {
-        using tags = decltype(get_tags(Fields()));
-        using data = decltype(get_tuple(Fields()));
-        return tagged_tuple_t<tags, data>();
-    }
-};  // namespace helper
-
-template <class Fields>
-using tagged_tuple = decltype(helper::make_tagged_tuple_t_type<Fields>());
-
-template <class AddressFirst, class Tags, class Tuple>
-auto& get(const tagged_tuple_t<Tags, Tuple>& tagged_tuple) {
-    return get<helper::get_index<AddressFirst>(Tags())>(tagged_tuple.data);
-}
-
-template <class AddressFirst, class... AddressRest, class TaggedTuple>
-auto& get(const TaggedTuple& tagged_tuple) {
-    return get<AddressRest...>(get<AddressFirst>(tagged_tuple));
-}
+// template <class AddressFirst, class... AddressRest, class TaggedTuple>
+// auto& get(const TaggedTuple& tagged_tuple) {
+//     return get<AddressRest...>(get<AddressFirst>(tagged_tuple));
+// }

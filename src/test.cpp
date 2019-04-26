@@ -27,7 +27,9 @@ license and that you accept its terms.*/
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
+#include <string>
 #include "tagged_tuple.hpp"
+using std::string;
 
 struct prop1 {};
 struct prop2 {};
@@ -50,38 +52,27 @@ struct alpha {};
 struct beta {};
 struct gamma {};
 
-TEST_CASE("Basic tuple test") {
-    using my_fields = std::tuple<field<alpha, int>, field<beta, std::string>>;
-    SUBCASE("Manual tests of under-the-hood things") {
-        using namespace helper;
-        using my_tags = decltype(get_tags(my_fields()));
-        using my_tuple_t = decltype(get_tuple(my_fields()));
-
-        my_tuple_t my_tuple{2, "hello"};
-
-        using tlist = std::tuple<alpha, beta>;
-        bool ok_tags = std::is_same<my_tags, tlist>::value;
-        CHECK(ok_tags);
-        CHECK(get_index<alpha>(tlist()) == 0);
-        CHECK(get_index<beta>(tlist()) == 1);
-        // CHECK(get_index<gamma>(tlist()) == -1); // triggers static assert
-
-        auto a = get<get_index<beta>(tlist())>(my_tuple);
-        CHECK(a == "hello");
-        auto b = get<get_index<alpha>(tlist())>(my_tuple);
-        CHECK(b == 2);
-    }
-    SUBCASE("Using user-level interface") {
-        using hello_t = tagged_tuple<my_fields>;
-        hello_t my_other_struct{3, "hi"};
-        CHECK(get<alpha>(my_other_struct) == 3);
-        CHECK(get<beta>(my_other_struct) == "hi");
-    }
+TEST_CASE("Direct usage of tagged_tuple_t") {
+    using namespace type_map;
+    using my_map = Map<Pair<alpha, int>, Pair<beta, string>>;
+    using my_tuple_t = tagged_tuple_t<my_map, tuple<int, string>>;
+    my_tuple_t my_tuple{2, "hello"};
+    CHECK(my_tuple.get<alpha>() == 2);
+    CHECK(my_tuple.get<beta>() == "hello");
 }
 
-TEST_CASE("Multiple levels") {
-    using sttuple_t = tagged_tuple<std::tuple<field<alpha, int>>>;
-    using cttuple_t = tagged_tuple<std::tuple<field<beta, sttuple_t>>>;
-    cttuple_t my_tuple(7);
-    CHECK(get<beta, alpha>(my_tuple) == 7);
-}
+// TEST_CASE("Basic tuple test") {
+//     using my_fields = std::tuple<field<alpha, int>, field<beta, std::string>>;
+
+//     using hello_t = tagged_tuple<my_fields>;
+//     hello_t my_other_struct{3, "hi"};
+//     CHECK(get<alpha>(my_other_struct) == 3);
+//     CHECK(get<beta>(my_other_struct) == "hi");
+// }
+
+// TEST_CASE("Multiple levels") {
+//     using sttuple_t = tagged_tuple<std::tuple<field<alpha, int>>>;
+//     using cttuple_t = tagged_tuple<std::tuple<field<beta, sttuple_t>>>;
+//     cttuple_t my_tuple(7);
+//     CHECK(get<beta, alpha>(my_tuple) == 7);
+// }
