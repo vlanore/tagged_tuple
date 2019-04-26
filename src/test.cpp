@@ -33,6 +33,7 @@ using std::string;
 
 struct prop1 {};
 struct prop2 {};
+struct prop3 {};
 
 TEST_CASE("Type map") {
     using namespace type_map;
@@ -49,6 +50,12 @@ TEST_CASE("Type map") {
 
     using tuple_t = my_map::value_tuple_t;
     CHECK((std::is_same<tuple<int, double>, tuple_t>::value));
+
+    using my_map2 = my_map::add<prop3, string>;
+    using prop3_t = typename my_map2::get<prop3>;
+    constexpr int i3 = my_map2::get_index<prop3>();
+    CHECK((std::is_same<prop3_t, string>::value));
+    CHECK(i3 == 2);
 }
 
 struct alpha {};
