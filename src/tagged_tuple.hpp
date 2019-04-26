@@ -28,10 +28,9 @@ license and that you accept its terms.*/
 #include "doctest.h"
 
 #include <string>
-#include <tuple>
+#include "type_map.hpp"
 using std::get;
 using std::string;
-using std::tuple;
 
 template <class Tag, class Type>
 struct field {};

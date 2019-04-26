@@ -29,6 +29,18 @@ license and that you accept its terms.*/
 
 #include "tagged_tuple.hpp"
 
+struct prop1 {};
+struct prop2 {};
+
+TEST_CASE("Type map") {
+    using my_map = TypeMap<TypePair<prop1, int>, TypePair<prop2, double>>;
+    using prop1_t = typename my_map::get_t<prop1>;
+    using prop2_t = typename my_map::get_t<prop2>;
+
+    CHECK((std::is_same<prop1_t, int>::value));
+    CHECK((std::is_same<prop2_t, double>::value));
+}
+
 struct alpha {};
 struct beta {};
 struct gamma {};
