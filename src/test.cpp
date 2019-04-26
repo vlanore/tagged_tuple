@@ -46,6 +46,9 @@ TEST_CASE("Type map") {
     CHECK((std::is_same<prop2_t, double>::value));
     CHECK(i1 == 0);
     CHECK(i2 == 1);
+
+    using tuple_t = my_map::value_tuple_t;
+    CHECK((std::is_same<tuple<int, double>, tuple_t>::value));
 }
 
 struct alpha {};
@@ -64,6 +67,14 @@ TEST_CASE("Direct usage of tagged_tuple_t") {
     const my_tuple_t my_const_tuple{3, "hi"};
     CHECK(my_const_tuple.get<alpha>() == 3);
     CHECK(my_const_tuple.get<beta>() == "hi");
+}
+
+TEST_CASE("tagged_tuple typedef") {
+    // using my_tuple_t = tagged_tuple<field<alpha, int>, field<beta, string>>;
+
+    // my_tuple_t my_tuple{2, "hello"};
+    // CHECK(my_tuple.get<alpha>() == 2);
+    // CHECK(my_tuple.get<beta>() == "hello");
 }
 
 // TEST_CASE("Basic tuple test") {

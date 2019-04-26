@@ -73,5 +73,15 @@ namespace type_map {
         template <class Key, class Type>
         // type alias for the result of the add function
         using add = decltype(Map<Decls..., Pair<Key, Type>>());
+
+        static auto value_tuple_helper(tuple<>) { return tuple<>(); }
+
+        template <class Key, class Value, class... Rest>
+        static auto value_tuple_helper(tuple<Pair<Key, Value>, Rest...>) {
+            auto recursive_call = value_tuple_helper(tuple<Rest...>());
+            return std::tuple_cat(tuple<Value>(), recursive_call);
+        }
+
+        using value_tuple_t = decltype(value_tuple_helper(tuple<Decls...>()));
     };
 };  // namespace type_map

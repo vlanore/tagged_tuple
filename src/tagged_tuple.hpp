@@ -55,18 +55,3 @@ struct tagged_tuple_t {
 template <class Tag, class Type>
 // to be used in field list declaration
 struct field {};
-
-// type of tagged tuple from field list
-
-// template <class Fields>
-// using tagged_tuple = decltype(helper::make_tagged_tuple_t_type<Fields>());
-
-// template <class AddressFirst, class Tags, class Tuple>
-// auto& get(const tagged_tuple_t<Tags, Tuple>& tagged_tuple) {
-//     return get<helper::get_index<AddressFirst>(Tags())>(tagged_tuple.data);
-// }
-
-// template <class AddressFirst, class... AddressRest, class TaggedTuple>
-// auto& get(const TaggedTuple& tagged_tuple) {
-//     return get<AddressRest...>(get<AddressFirst>(tagged_tuple));
-// }
