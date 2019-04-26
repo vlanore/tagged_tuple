@@ -35,11 +35,15 @@ struct prop2 {};
 TEST_CASE("Type map") {
     using namespace type_map;
     using my_map = Map<Pair<prop1, int>, Pair<prop2, double>>;
-    using prop1_t = typename my_map::get_t<prop1>;
-    using prop2_t = typename my_map::get_t<prop2>;
+    using prop1_t = typename my_map::get<prop1>;
+    using prop2_t = typename my_map::get<prop2>;
+    constexpr int i1 = my_map::get_index<prop1>();
+    constexpr int i2 = my_map::get_index<prop2>();
 
     CHECK((std::is_same<prop1_t, int>::value));
     CHECK((std::is_same<prop2_t, double>::value));
+    CHECK(i1 == 0);
+    CHECK(i2 == 1);
 }
 
 struct alpha {};
@@ -68,7 +72,7 @@ TEST_CASE("Basic tuple test") {
         CHECK(b == 2);
     }
     SUBCASE("Using user-level interface") {
-        using hello_t = ttuple<my_fields>;
+        using hello_t = tagged_tuple<my_fields>;
         hello_t my_other_struct{3, "hi"};
         CHECK(get<alpha>(my_other_struct) == 3);
         CHECK(get<beta>(my_other_struct) == "hi");
@@ -76,8 +80,8 @@ TEST_CASE("Basic tuple test") {
 }
 
 TEST_CASE("Multiple levels") {
-    using sttuple_t = ttuple<std::tuple<field<alpha, int>>>;
-    using cttuple_t = ttuple<std::tuple<field<beta, sttuple_t>>>;
+    using sttuple_t = tagged_tuple<std::tuple<field<alpha, int>>>;
+    using cttuple_t = tagged_tuple<std::tuple<field<beta, sttuple_t>>>;
     cttuple_t my_tuple(7);
     CHECK(get<beta, alpha>(my_tuple) == 7);
 }

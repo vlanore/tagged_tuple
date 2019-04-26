@@ -37,39 +37,41 @@ namespace type_map {
 
     template <class... Decls>
     struct Map {
-        template <class Key, class Type>
-        // returns another map with an added key/value entry
-        static auto add() {
-            return Map<Decls..., Pair<Key, Type>>();
-        }
+        template <class Value, int _index>
+        // return of get_helper
+        struct GetReturn {
+            using value = Value;
+            static constexpr int index = _index;
+        };
 
-        template <class Key>
+        template <class Key, int index>
         // helper to recursively look for key in map (base case)
-        static auto helper(tuple<>) {
+        static auto get_helper(tuple<>) {
             return NotFound();
         }
 
-        template <class RequestedKey, class Key, class Value, class... DeclRest>
+        template <class RequestedKey, int index, class Key, class Value, class... DeclRest>
         // helper to recursively look for key in map
-        static auto helper(tuple<Pair<Key, Value>, DeclRest...>) {
-            using if_equal = Value;
-            using if_not_equal = decltype(helper<RequestedKey>(tuple<DeclRest...>()));
+        static auto get_helper(tuple<Pair<Key, Value>, DeclRest...>) {
+            using if_equal = GetReturn<Value, index>;
+            using if_not_equal =
+                decltype(get_helper<RequestedKey, index + 1>(tuple<DeclRest...>()));
             constexpr bool equality = std::is_same<RequestedKey, Key>::value;
             return std::conditional_t<equality, if_equal, if_not_equal>();
         }  // note that return value is a default-constructed Value object (FIXME?)
 
         template <class Key>
-        // get type associated with a given key (function version)
-        static auto get() {
-            return helper<Key>(tuple<Decls...>());
-        }
+        // type alias for the result of the get function
+        using get = typename decltype(get_helper<Key, 0>(tuple<Decls...>()))::value;
 
         template <class Key>
         // type alias for the result of the get function
-        using get_t = decltype(get<Key>());
+        static constexpr int get_index() {
+            return decltype(get_helper<Key, 0>(tuple<Decls...>()))::index;
+        }
 
         template <class Key, class Type>
-        // type alias for the result of the get function
-        using add_t = decltype(add<Key, Type>());
+        // type alias for the result of the add function
+        using add = decltype(Map<Decls..., Pair<Key, Type>>());
     };
 };  // namespace type_map
