@@ -72,7 +72,7 @@ namespace type_map {
 
         template <class Key, class Type>
         // type alias for the result of the add function
-        using add = decltype(Map<Decls..., Pair<Key, Type>>());
+        using add = decltype(Map<Pair<Key, Type>, Decls...>());
 
         static auto value_tuple_helper(tuple<>) { return tuple<>(); }
 

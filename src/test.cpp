@@ -53,9 +53,10 @@ TEST_CASE("Type map") {
 
     using my_map2 = my_map::add<prop3, string>;
     using prop3_t = typename my_map2::get<prop3>;
-    constexpr int i3 = my_map2::get_index<prop3>();
     CHECK((std::is_same<prop3_t, string>::value));
-    CHECK(i3 == 2);
+    CHECK(my_map2::get_index<prop3>() == 0);  // added in front
+    CHECK(my_map2::get_index<prop1>() == 1);
+    CHECK(my_map2::get_index<prop2>() == 2);
 }
 
 struct alpha {};
@@ -79,7 +80,7 @@ TEST_CASE("Direct usage of tagged_tuple_t") {
 TEST_CASE("tagged_tuple typedef") {
     using my_tuple_t = tagged_tuple<field<alpha, int>, field<beta, string>>;
 
-    my_tuple_t my_tuple{"hello", 2};  // FIXME order reversed!
+    my_tuple_t my_tuple{2, "hello"};  // FIXME order reversed!
     CHECK(my_tuple.get<alpha>() == 2);
     CHECK(my_tuple.get<beta>() == "hello");
 }
