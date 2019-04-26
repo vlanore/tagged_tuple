@@ -33,7 +33,8 @@ struct prop1 {};
 struct prop2 {};
 
 TEST_CASE("Type map") {
-    using my_map = TypeMap<TypePair<prop1, int>, TypePair<prop2, double>>;
+    using namespace type_map;
+    using my_map = Map<Pair<prop1, int>, Pair<prop2, double>>;
     using prop1_t = typename my_map::get_t<prop1>;
     using prop2_t = typename my_map::get_t<prop2>;
 

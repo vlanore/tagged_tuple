@@ -27,39 +27,49 @@ license and that you accept its terms.*/
 #include <tuple>
 using std::tuple;
 
-template <class Tag, class Type>
-struct TypePair {};
+namespace type_map {
+    // represents a pair of types
+    template <class Tag, class Type>
+    struct Pair {};
 
-struct NotFound {};
+    // to be used as return value when key not found in map
+    struct NotFound {};
 
-template <class... Decls>
-struct TypeMap {
-    template <class Key, class Type>
-    static auto add() {
-        return TypeMap<Decls..., TypePair<Key, Type>>();
-    }
+    template <class... Decls>
+    struct Map {
+        template <class Key, class Type>
+        // returns another map with an added key/value entry
+        static auto add() {
+            return Map<Decls..., Pair<Key, Type>>();
+        }
 
-    template <class Key>
-    static auto helper(tuple<>) {
-        return NotFound();
-    }
+        template <class Key>
+        // helper to recursively look for key in map (base case)
+        static auto helper(tuple<>) {
+            return NotFound();
+        }
 
-    template <class RequestedKey, class Key, class Value, class... DeclRest>
-    static auto helper(tuple<TypePair<Key, Value>, DeclRest...>) {
-        using if_equal = Value;
-        using if_not_equal = decltype(helper<RequestedKey>(tuple<DeclRest...>()));
-        constexpr bool equality = std::is_same<RequestedKey, Key>::value;
-        return std::conditional_t<equality, if_equal, if_not_equal>();
-    }
+        template <class RequestedKey, class Key, class Value, class... DeclRest>
+        // helper to recursively look for key in map
+        static auto helper(tuple<Pair<Key, Value>, DeclRest...>) {
+            using if_equal = Value;
+            using if_not_equal = decltype(helper<RequestedKey>(tuple<DeclRest...>()));
+            constexpr bool equality = std::is_same<RequestedKey, Key>::value;
+            return std::conditional_t<equality, if_equal, if_not_equal>();
+        }  // note that return value is a default-constructed Value object (FIXME?)
 
-    template <class Key>
-    static auto get() {
-        return helper<Key>(tuple<Decls...>());
-    }
+        template <class Key>
+        // get type associated with a given key (function version)
+        static auto get() {
+            return helper<Key>(tuple<Decls...>());
+        }
 
-    template <class Key>
-    using get_t = decltype(get<Key>());
+        template <class Key>
+        // type alias for the result of the get function
+        using get_t = decltype(get<Key>());
 
-    template <class Key, class Type>
-    using add_t = decltype(add<Key, Type>());
-};
+        template <class Key, class Type>
+        // type alias for the result of the get function
+        using add_t = decltype(add<Key, Type>());
+    };
+};  // namespace type_map
