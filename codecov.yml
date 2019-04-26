@@ -6,4 +6,4 @@ coverage:
 
 ignore:
   - utils/.*
-  - src/*test.cpp
+  - src/test.cpp
