@@ -30,10 +30,11 @@ license and that you accept its terms.*/
 #include "type_map.hpp"
 using std::string;
 
-template <class TagMap, class Tuple>
+template <class TagMap>
 // tagged tuple class (just a tuple wrapper with added tags and static funcs)
 struct tagged_tuple_t {
-    Tuple data;
+    using tuple_t = typename TagMap::value_tuple_t;
+    tuple_t data;
 
     template <class... Args>
     // constructor that just perfect-forwards arguments to tuple constructor
@@ -55,3 +56,19 @@ struct tagged_tuple_t {
 template <class Tag, class Type>
 // to be used in field list declaration
 struct field {};
+
+namespace helper {
+
+    auto map_from_fields(tuple<>) { return type_map::Map<>(); }
+
+    template <class Tag, class Type, class... Rest>
+    auto map_from_fields(tuple<field<Tag, Type>, Rest...>) {
+        using recursive_call = decltype(map_from_fields(tuple<Rest...>()));
+        using add_field = typename recursive_call::template add<Tag, Type>;
+        return add_field();
+    }
+
+};  // namespace helper
+
+template <class... Fields>
+using tagged_tuple = tagged_tuple_t<decltype(helper::map_from_fields(tuple<Fields...>()))>;

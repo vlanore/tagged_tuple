@@ -65,7 +65,7 @@ struct gamma {};
 TEST_CASE("Direct usage of tagged_tuple_t") {
     using namespace type_map;
     using my_map = Map<Pair<alpha, int>, Pair<beta, string>>;
-    using my_tuple_t = tagged_tuple_t<my_map, tuple<int, string>>;
+    using my_tuple_t = tagged_tuple_t<my_map>;
 
     my_tuple_t my_tuple{2, "hello"};
     CHECK(my_tuple.get<alpha>() == 2);
@@ -77,11 +77,11 @@ TEST_CASE("Direct usage of tagged_tuple_t") {
 }
 
 TEST_CASE("tagged_tuple typedef") {
-    // using my_tuple_t = tagged_tuple<field<alpha, int>, field<beta, string>>;
+    using my_tuple_t = tagged_tuple<field<alpha, int>, field<beta, string>>;
 
-    // my_tuple_t my_tuple{2, "hello"};
-    // CHECK(my_tuple.get<alpha>() == 2);
-    // CHECK(my_tuple.get<beta>() == "hello");
+    my_tuple_t my_tuple{"hello", 2};  // FIXME order reversed!
+    CHECK(my_tuple.get<alpha>() == 2);
+    CHECK(my_tuple.get<beta>() == "hello");
 }
 
 // TEST_CASE("Basic tuple test") {
