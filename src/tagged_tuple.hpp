@@ -110,7 +110,6 @@ auto unique_ptr_field(Type&& data) {
 }
 
 namespace helper {
-
     auto make_tagged_tuple_helper() { return tagged_tuple<>(); }
 
     template <class Tag, class Type, class... Rest>
@@ -118,10 +117,10 @@ namespace helper {
         auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
         return recursive_call.template expand<Tag>(std::move(f1.data));
     }
-
 };  // namespace helper
 
 template <class... Fields>
+// builds a tuple from a list of fields with values (auto-deduces field types from values)
 auto make_tagged_tuple(Fields&&... fields) {
     return helper::make_tagged_tuple_helper(std::forward<Fields>(fields)...);
 }
