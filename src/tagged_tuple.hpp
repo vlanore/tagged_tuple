@@ -41,12 +41,14 @@ struct tagged_tuple_t {
     tagged_tuple_t(Args&&... args) : data(std::forward<Args>(args)...) {}
 
     template <class Tag>
+    // get a field of the tagged tuple by tag (returns a reference)
     auto& get() {
         constexpr int index = TagMap::template get_index<Tag>();
         return std::get<index>(data);
     }
 
     template <class Tag>
+    // get a field of the tagged tuple by tag (returns a constant reference)
     const auto& get() const {
         constexpr int index = TagMap::template get_index<Tag>();
         return std::get<index>(data);
@@ -55,12 +57,14 @@ struct tagged_tuple_t {
     template <class Tag, class Type, size_t... Is>
     auto expand_helper(Type&& new_data, std::index_sequence<Is...>) {
         using new_tagmap = typename TagMap::template add<Tag, Type>;
-        // important: this moves old data (e.g., in case of unique_ptr)
+        // important: this moves old data (e.g., in case of unique_ptr  )
         return tagged_tuple_t<new_tagmap>(std::forward<Type>(new_data),
                                           std::move(std::get<Is>(data))...);
     }
 
     template <class Tag, class Type>
+    // adds a field to the struct and returns a new struct
+    // WARNING: might invalidate old struct by moveing its contents to new struct!
     auto expand(Type&& new_data) {
         auto is = std::make_index_sequence<std::tuple_size<tuple_t>::value>();
         return expand_helper<Tag>(std::forward<Type>(new_data), is);
@@ -83,6 +87,7 @@ namespace helper {
 };  // namespace helper
 
 template <class... Fields>
+// alias used to construct ttuple type from a list of fields (a list of "field" objects)
 using tagged_tuple = tagged_tuple_t<decltype(helper::map_from_fields(tuple<Fields...>()))>;
 
 // template <class Tag, class Type>

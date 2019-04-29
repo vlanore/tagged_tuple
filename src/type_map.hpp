@@ -83,6 +83,8 @@ namespace type_map {
             return std::tuple_cat(tuple<Value>(), std::move(recursive_call));
         }
 
+        // type alias that corresponds to a tuple of all the values
+        // (to be used in tagged tuple, at least)
         using value_tuple_t = decltype(value_tuple_helper(tuple<Decls...>()));
     };
 };  // namespace type_map
