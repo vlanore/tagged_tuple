@@ -95,3 +95,17 @@ TEST_CASE("expand tagged tuple") {
     CHECK(t3.get<beta>() == 2.3);
     CHECK(t3.get<gamma>() == "hello");
 }
+
+TEST_CASE("Test with unique_ptrs") {
+    tagged_tuple<field<beta, int>, field<alpha, std::unique_ptr<double>>> t1(
+        3, std::make_unique<double>(2.3));
+    CHECK(*t1.get<alpha>() == 2.3);
+    CHECK(t1.get<beta>() == 3);
+
+    auto t2 = t1.expand<struct gamma, std::unique_ptr<std::string>>(
+        std::make_unique<std::string>("hello"));
+    CHECK(t1.get<alpha>() == nullptr);
+    CHECK(*t2.get<alpha>() == 2.3);
+    CHECK(t2.get<beta>() == 3);
+    CHECK(*t2.get<gamma>() == "hello");
+}

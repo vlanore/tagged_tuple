@@ -79,7 +79,8 @@ namespace type_map {
         template <class Key, class Value, class... Rest>
         static auto value_tuple_helper(tuple<Pair<Key, Value>, Rest...>) {
             auto recursive_call = value_tuple_helper(tuple<Rest...>());
-            return std::tuple_cat(tuple<Value>(), recursive_call);
+            // added move so it would compile with unique_ptrs (never actually instantiated anyway)
+            return std::tuple_cat(tuple<Value>(), std::move(recursive_call));
         }
 
         using value_tuple_t = decltype(value_tuple_helper(tuple<Decls...>()));
