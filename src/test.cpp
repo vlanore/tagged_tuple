@@ -61,7 +61,7 @@ TEST_CASE("Type map") {
 
 struct alpha {};
 struct beta {};
-struct gamma {};
+struct gamma_ {};
 
 TEST_CASE("Direct usage of tagged_tuple_t") {
     using namespace type_map;
@@ -85,18 +85,13 @@ TEST_CASE("tagged_tuple typedef") {
     CHECK(my_tuple.get<beta>() == "hello");
 }
 
-// TEST_CASE("Basic tuple test") {
-//     using my_fields = std::tuple<field<alpha, int>, field<beta, std::string>>;
-
-//     using hello_t = tagged_tuple<my_fields>;
-//     hello_t my_other_struct{3, "hi"};
-//     CHECK(get<alpha>(my_other_struct) == 3);
-//     CHECK(get<beta>(my_other_struct) == "hi");
-// }
-
-// TEST_CASE("Multiple levels") {
-//     using sttuple_t = tagged_tuple<std::tuple<field<alpha, int>>>;
-//     using cttuple_t = tagged_tuple<std::tuple<field<beta, sttuple_t>>>;
-//     cttuple_t my_tuple(7);
-//     CHECK(get<beta, alpha>(my_tuple) == 7);
-// }
+TEST_CASE("expand tagged tuple") {
+    tagged_tuple<field<alpha, int>> t1(17);
+    auto t2 = t1.expand<beta>(2.3);
+    CHECK(t2.get<alpha>() == 17);
+    CHECK(t2.get<beta>() == 2.3);
+    auto t3 = t2.expand<struct gamma, std::string>("hello");
+    CHECK(t3.get<alpha>() == 17);
+    CHECK(t3.get<beta>() == 2.3);
+    CHECK(t3.get<gamma>() == "hello");
+}

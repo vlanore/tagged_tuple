@@ -51,6 +51,18 @@ struct tagged_tuple_t {
         constexpr int index = TagMap::template get_index<Tag>();
         return std::get<index>(data);
     }
+
+    template <class Tag, class Type, size_t... Is>
+    auto expand_helper(Type new_data, std::index_sequence<Is...>) {
+        using new_tagmap = typename TagMap::template add<Tag, Type>;
+        return tagged_tuple_t<new_tagmap>(new_data, std::get<Is>(data)...);
+    }
+
+    template <class Tag, class Type>
+    auto expand(Type new_data) {
+        auto is = std::make_index_sequence<std::tuple_size<tuple_t>::value>();
+        return expand_helper<Tag>(new_data, is);
+    }
 };
 
 template <class Tag, class Type>
@@ -58,7 +70,6 @@ template <class Tag, class Type>
 struct field {};
 
 namespace helper {
-
     auto map_from_fields(tuple<>) { return type_map::Map<>(); }
 
     template <class Tag, class Type, class... Rest>
@@ -67,8 +78,21 @@ namespace helper {
         using add_field = typename recursive_call::template add<Tag, Type>;
         return add_field();
     }
-
 };  // namespace helper
 
 template <class... Fields>
 using tagged_tuple = tagged_tuple_t<decltype(helper::map_from_fields(tuple<Fields...>()))>;
+
+// template <class Tag, class Type>
+// // to be used in make_tagged_tuple
+// struct field_from {
+//     Type data;
+//     field_from(Type&& data) : data(std::forward<Type>(data)) {}
+//     using tag = Tag;
+//     using type = Type;
+// };
+
+// namespace helper {};
+
+// template <class... Fields>
+// auto make_tagged_tuple(Fields&&... fields) {}
