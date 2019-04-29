@@ -115,4 +115,8 @@ TEST_CASE("make_tagged_tuple") {
         make_tagged_tuple(field_from<alpha>(3), field_from<beta>(std::make_unique<double>(3.2)));
     CHECK(t1.get<alpha>() == 3);
     CHECK(*t1.get<beta>() == 3.2);
+
+    auto t2 = make_tagged_tuple(field_from<alpha>(3), unique_ptr_field<beta>(3.2));
+    CHECK(t2.get<alpha>() == 3);
+    CHECK(*t2.get<beta>() == 3.2);
 }

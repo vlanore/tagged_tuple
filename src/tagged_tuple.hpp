@@ -104,6 +104,11 @@ auto field_from(Type&& data) {
     return FieldFrom<Tag, Type>(std::forward<Type>(data));
 }
 
+template <class Tag, class Type>
+auto unique_ptr_field(Type&& data) {
+    return FieldFrom<Tag, std::unique_ptr<Type>>(std::make_unique<Type>(std::forward<Type>(data)));
+}
+
 namespace helper {
 
     auto make_tagged_tuple_helper() { return tagged_tuple<>(); }
