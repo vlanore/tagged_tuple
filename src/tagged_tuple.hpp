@@ -90,16 +90,33 @@ template <class... Fields>
 // alias used to construct ttuple type from a list of fields (a list of "field" objects)
 using tagged_tuple = tagged_tuple_t<decltype(helper::map_from_fields(tuple<Fields...>()))>;
 
-// template <class Tag, class Type>
-// // to be used in make_tagged_tuple
-// struct field_from {
-//     Type data;
-//     field_from(Type&& data) : data(std::forward<Type>(data)) {}
-//     using tag = Tag;
-//     using type = Type;
-// };
+template <class Tag, class Type>
+// to be used in make_tagged_tuple
+struct FieldFrom {
+    Type data;
+    FieldFrom(Type&& data) : data(std::forward<Type>(data)) {}
+    using tag = Tag;
+    using type = Type;
+};
 
-// namespace helper {};
+template <class Tag, class Type>
+auto field_from(Type&& data) {
+    return FieldFrom<Tag, Type>(std::forward<Type>(data));
+}
 
-// template <class... Fields>
-// auto make_tagged_tuple(Fields&&... fields) {}
+namespace helper {
+
+    auto make_tagged_tuple_helper() { return tagged_tuple<>(); }
+
+    template <class Tag, class Type, class... Rest>
+    auto make_tagged_tuple_helper(FieldFrom<Tag, Type> f1, Rest&&... rest) {
+        auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
+        return recursive_call.template expand<Tag>(std::move(f1.data));
+    }
+
+};  // namespace helper
+
+template <class... Fields>
+auto make_tagged_tuple(Fields&&... fields) {
+    return helper::make_tagged_tuple_helper(std::forward<Fields>(fields)...);
+}

@@ -109,3 +109,10 @@ TEST_CASE("Test with unique_ptrs") {
     CHECK(t2.get<beta>() == 3);
     CHECK(*t2.get<gamma>() == "hello");
 }
+
+TEST_CASE("make_tagged_tuple") {
+    auto t1 =
+        make_tagged_tuple(field_from<alpha>(3), field_from<beta>(std::make_unique<double>(3.2)));
+    CHECK(t1.get<alpha>() == 3);
+    CHECK(*t1.get<beta>() == 3.2);
+}
