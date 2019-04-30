@@ -76,18 +76,31 @@ namespace type_map {
         // type alias for the result of the add function
         using add = decltype(Map<Pair<Key, Type>, Decls...>());
 
-        static auto value_tuple_helper(tuple<>) { return tuple<>(); }
+        struct helper {
+            template <class... Types>
+            struct TypeList {
+                using tuple = std::tuple<Types...>;
 
-        template <class Key, class Value, class... Rest>
-        static auto value_tuple_helper(tuple<Pair<Key, Value>, Rest...>) {
-            auto recursive_call = value_tuple_helper(tuple<Rest...>());
-            // added move so it would compile with unique_ptrs (never actually instantiated anyway)
-            return std::tuple_cat(tuple<Value>(), std::move(recursive_call));
-        }
+                template <class Type>
+                using add = TypeList<Type, Types...>;
+            };
+
+            static auto value_tuple_helper(tuple<>) { return TypeList<>(); }
+
+            template <class Key, class Value, class... Rest>
+            static auto value_tuple_helper(tuple<Pair<Key, Value>, Rest...>) {
+                auto recursive_call = value_tuple_helper(tuple<Rest...>());
+                // added move so it would compile with unique_ptrs (never actually instantiated
+                // anyway)
+                using return_type = typename decltype(recursive_call)::template add<Value>;
+                return return_type();
+            }
+        };
 
         // type alias that corresponds to a tuple of all the values
         // (to be used in tagged tuple, at least)
-        using value_tuple_t = decltype(value_tuple_helper(tuple<Decls...>()));
+        using value_tuple_t =
+            typename decltype(helper::value_tuple_helper(tuple<Decls...>()))::tuple;
 
         template <int index>
         using get_tag = typename std::remove_reference<decltype(
