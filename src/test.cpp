@@ -43,6 +43,7 @@ TEST_CASE("Type map") {
     constexpr int i1 = my_map::get_index<prop1>();
     constexpr int i2 = my_map::get_index<prop2>();
 
+    CHECK(my_map::size() == 2);
     CHECK((std::is_same<prop1_t, int>::value));
     CHECK((std::is_same<prop2_t, double>::value));
     CHECK(i1 == 0);

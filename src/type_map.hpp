@@ -92,5 +92,7 @@ namespace type_map {
         template <int index>
         using get_tag = typename std::remove_reference<decltype(
             std::get<index>(std::declval<tuple<Decls...>>()))>::type::tag;
+
+        static constexpr size_t size() { return sizeof...(Decls); }
     };
 };  // namespace type_map
