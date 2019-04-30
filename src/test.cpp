@@ -28,6 +28,7 @@ license and that you accept its terms.*/
 #include "doctest.h"
 
 #include <string>
+#include "debug_tools.hpp"
 #include "tagged_tuple.hpp"
 using std::string;
 
@@ -150,4 +151,13 @@ TEST_CASE("is_tagged_tuple") {
     using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
     CHECK(is_tagged_tuple<tuple_t>);
     CHECK(!is_tagged_tuple<double>);
+}
+
+TEST_CASE("basic type printing") { CHECK(type_to_string<alpha>() == "alpha"); }
+
+TEST_CASE("struct printing") {
+    using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
+    tuple_t t(1, 3.2);
+    std::string debug = tuple_to_string(t);
+    CHECK(debug == "{ int alpha; double beta; }");
 }
