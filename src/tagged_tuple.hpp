@@ -65,8 +65,10 @@ struct tagged_tuple_t {
 
     template <class Tag, class Type>
     // adds a field to the struct and returns a new struct
-    // WARNING: might invalidate old struct by moveing its contents to new struct!
+    // WARNING: might invalidate old struct by moving its contents to new struct!
     auto expand(Type&& new_data) {
+        // build index sequence to be abl to unpack tuple into tagged_tuple_t constructor
+        // unpacking happens in helper
         auto is = std::make_index_sequence<std::tuple_size<tuple_t>::value>();
         return expand_helper<Tag>(std::forward<Type>(new_data), is);
     }
@@ -93,28 +95,29 @@ using tagged_tuple = tagged_tuple_t<decltype(helper::map_from_fields(tuple<Field
 
 template <class Tag, class Type>
 // to be used in make_tagged_tuple
-struct FieldFrom {
+struct TagValuePair {
     Type data;
-    FieldFrom(Type&& data) : data(std::forward<Type>(data)) {}
-    using tag = Tag;
-    using type = Type;
+    TagValuePair(Type&& data) : data(std::forward<Type>(data)) {}
 };
 
 template <class Tag, class Type>
+// to be used in make_tagged_tuple calls
 auto field_from(Type&& data) {
-    return FieldFrom<Tag, Type>(std::forward<Type>(data));
+    return TagValuePair<Tag, Type>(std::forward<Type>(data));
 }
 
 template <class Tag, class Type>
+// to be used in make_tagged_tuple calls; builds a unique pointer to Type from Type constructor args
 auto unique_ptr_field(Type&& data) {
-    return FieldFrom<Tag, std::unique_ptr<Type>>(std::make_unique<Type>(std::forward<Type>(data)));
+    return TagValuePair<Tag, std::unique_ptr<Type>>(
+        std::make_unique<Type>(std::forward<Type>(data)));
 }
 
 namespace helper {
     auto make_tagged_tuple_helper() { return tagged_tuple<>(); }
 
     template <class Tag, class Type, class... Rest>
-    auto make_tagged_tuple_helper(FieldFrom<Tag, Type> f1, Rest&&... rest) {
+    auto make_tagged_tuple_helper(TagValuePair<Tag, Type> f1, Rest&&... rest) {
         auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
         return recursive_call.template expand<Tag>(std::move(f1.data));
     }
