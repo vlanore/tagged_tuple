@@ -57,6 +57,18 @@ struct tagged_tuple_t {
         return std::get<index>(data);
     }
 
+    template <class First, class Second, class... Rest>
+    // recursive version of getter (for tagged tuple parameters)
+    auto& get() {
+        return get<First>().template get<Second, Rest...>();
+    }
+
+    template <class First, class Second, class... Rest>
+    // recursive version of getter (for tagged tuple parameters)
+    const auto& get() const {
+        return get<First>().template get<Second, Rest...>();
+    }
+
     template <class Tag, class Type, size_t... Is>
     auto expand_helper(Type&& new_data, std::index_sequence<Is...>) {
         using new_tagmap = typename TagMap::template add<Tag, Type>;

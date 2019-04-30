@@ -138,3 +138,10 @@ TEST_CASE("type_of") {
     CHECK((std::is_same<alpha_t, int>::value));
     CHECK((std::is_same<beta_t, double>::value));
 }
+
+TEST_CASE("recursive tagged tuple") {
+    using tuple_t = tagged_tuple<field<alpha, int>>;
+    using tuple2_t = tagged_tuple<field<beta, tuple_t>>;
+    tuple2_t t{2};
+    CHECK((t.get<beta, alpha>() == 2));
+}
