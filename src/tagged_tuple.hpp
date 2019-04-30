@@ -41,18 +41,30 @@ struct tagged_tuple_t {
     // constructor that just perfect-forwards arguments to tuple constructor
     tagged_tuple_t(Args&&... args) : data(std::forward<Args>(args)...) {}
 
+    template <int index>
+    // get a field of the tagged tuple by index (returns a reference)
+    auto& get() {
+        return std::get<index>(data);
+    }
+
+    template <int index>
+    // get a field of the tagged tuple by index (returns a constant reference)
+    const auto& get() const {
+        return std::get<index>(data);
+    }
+
     template <class Tag>
     // get a field of the tagged tuple by tag (returns a reference)
     auto& get() {
         constexpr int index = TagMap::template get_index<Tag>();
-        return std::get<index>(data);
+        return get<index>();
     }
 
     template <class Tag>
     // get a field of the tagged tuple by tag (returns a constant reference)
     const auto& get() const {
         constexpr int index = TagMap::template get_index<Tag>();
-        return std::get<index>(data);
+        return get<index>();
     }
 
     template <class Tag, class Type, size_t... Is>

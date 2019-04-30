@@ -120,3 +120,9 @@ TEST_CASE("make_tagged_tuple") {
     CHECK(t2.get<alpha>() == 7);
     CHECK(*t2.get<beta>() == 7.2);
 }
+
+TEST_CASE("int get") {
+    tagged_tuple<field<alpha, int>, field<beta, double>> t1{2, 3.2};
+    CHECK(t1.get<0>() == 2);
+    CHECK(t1.get<1>() == 3.2);
+}
