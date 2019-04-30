@@ -126,5 +126,5 @@ namespace helper {
 template <class... Fields>
 // builds a tuple from a list of fields with values (auto-deduces field types from values)
 auto make_tagged_tuple(Fields&&... fields) {
-    return helper::make_tagged_tuple_helper(std::forward<Fields>(fields)...);
+    return helper::make_tagged_tuple_helper(std::move(fields)...);
 }
