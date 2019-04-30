@@ -35,36 +35,25 @@ template <class TagMap>
 // tagged tuple class (just a tuple wrapper with added tags and static funcs)
 struct tagged_tuple_t {
     using tuple_t = typename TagMap::value_tuple_t;
+
     tuple_t data;
 
     template <class... Args>
     // constructor that just perfect-forwards arguments to tuple constructor
     tagged_tuple_t(Args&&... args) : data(std::forward<Args>(args)...) {}
 
-    template <int index>
-    // get a field of the tagged tuple by index (returns a reference)
-    auto& get() {
-        return std::get<index>(data);
-    }
-
-    template <int index>
-    // get a field of the tagged tuple by index (returns a constant reference)
-    const auto& get() const {
-        return std::get<index>(data);
-    }
-
     template <class Tag>
     // get a field of the tagged tuple by tag (returns a reference)
     auto& get() {
         constexpr int index = TagMap::template get_index<Tag>();
-        return get<index>();
+        return std::get<index>(data);
     }
 
     template <class Tag>
     // get a field of the tagged tuple by tag (returns a constant reference)
     const auto& get() const {
         constexpr int index = TagMap::template get_index<Tag>();
-        return get<index>();
+        return std::get<index>(data);
     }
 
     template <class Tag, class Type, size_t... Is>
@@ -84,6 +73,10 @@ struct tagged_tuple_t {
         auto is = std::make_index_sequence<std::tuple_size<tuple_t>::value>();
         return expand_helper<Tag>(std::forward<Type>(new_data), is);
     }
+
+    template <class Tag>
+    using type_of = typename std::remove_reference<decltype(
+        std::get<TagMap::template get_index<Tag>()>(std::declval<tuple_t>()))>::type;
 };
 
 template <class Tag, class Type>

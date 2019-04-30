@@ -121,8 +121,10 @@ TEST_CASE("make_tagged_tuple") {
     CHECK(*t2.get<beta>() == 7.2);
 }
 
-TEST_CASE("int get") {
-    tagged_tuple<field<alpha, int>, field<beta, double>> t1{2, 3.2};
-    CHECK(t1.get<0>() == 2);
-    CHECK(t1.get<1>() == 3.2);
+TEST_CASE("type_of") {
+    using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
+    using alpha_t = tuple_t::type_of<alpha>;
+    using beta_t = tuple_t::type_of<beta>;
+    CHECK((std::is_same<alpha_t, int>::value));
+    CHECK((std::is_same<beta_t, double>::value));
 }
