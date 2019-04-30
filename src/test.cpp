@@ -161,3 +161,13 @@ TEST_CASE("struct printing") {
     std::string debug = tuple_to_string(t);
     CHECK(debug == "{ int alpha; double beta; }");
 }
+
+TEST_CASE("recursive struct printing") {
+    using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
+    using tuple2_t = tagged_tuple<field<alpha, tuple_t>, field<beta, tuple_t>>;
+    tuple2_t t;
+    t.get<alpha>() = tuple_t(2, 3.9);
+    t.get<beta>() = tuple_t(0, 3.2);
+    std::string debug = tuple_to_string(t);
+    CHECK(debug == "{ { int alpha; double beta; } alpha; { int alpha; double beta; } beta; }");
+}
