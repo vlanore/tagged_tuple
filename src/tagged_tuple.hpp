@@ -35,6 +35,7 @@ template <class TagMap>
 // tagged tuple class (just a tuple wrapper with added tags and static funcs)
 struct tagged_tuple_t {
     using tuple_t = typename TagMap::value_tuple_t;
+    using tag_map = TagMap;
 
     tuple_t data;
 
