@@ -30,7 +30,9 @@ using std::tuple;
 namespace type_map {
     // represents a pair of types
     template <class Tag, class Type>
-    struct Pair {};
+    struct Pair {
+        using tag = Tag;
+    };
 
     // to be used as return value when key not found in map
     struct NotFound {};
@@ -86,5 +88,9 @@ namespace type_map {
         // type alias that corresponds to a tuple of all the values
         // (to be used in tagged tuple, at least)
         using value_tuple_t = decltype(value_tuple_helper(tuple<Decls...>()));
+
+        template <int index>
+        using get_tag = typename std::remove_reference<decltype(
+            std::get<index>(std::declval<tuple<Decls...>>()))>::type::tag;
     };
 };  // namespace type_map

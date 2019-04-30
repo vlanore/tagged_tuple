@@ -59,6 +59,15 @@ TEST_CASE("Type map") {
     CHECK(my_map2::get_index<prop2>() == 2);
 }
 
+TEST_CASE("type map index to tag") {
+    using namespace type_map;
+    using my_map = Map<Pair<prop1, int>, Pair<prop2, double>>;
+    using tag1 = my_map::get_tag<0>;
+    using tag2 = my_map::get_tag<1>;
+    CHECK((std::is_same<tag1, prop1>::value));
+    CHECK((std::is_same<tag2, prop2>::value));
+}
+
 struct alpha {};
 struct beta {};
 struct gamma_ {};
