@@ -145,3 +145,9 @@ TEST_CASE("recursive tagged tuple") {
     tuple2_t t{2};
     CHECK((t.get<beta, alpha>() == 2));
 }
+
+TEST_CASE("is_tagged_tuple") {
+    using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
+    CHECK(is_tagged_tuple<tuple_t>);
+    CHECK(!is_tagged_tuple<double>);
+}

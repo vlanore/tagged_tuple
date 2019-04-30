@@ -31,9 +31,11 @@ license and that you accept its terms.*/
 #include "type_map.hpp"
 using std::string;
 
+struct TaggedTupleTag {};
+
 template <class TagMap>
 // tagged tuple class (just a tuple wrapper with added tags and static funcs)
-struct tagged_tuple_t {
+struct tagged_tuple_t : TaggedTupleTag {
     using tuple_t = typename TagMap::value_tuple_t;
     using tag_map = TagMap;
 
@@ -146,3 +148,6 @@ template <class... Fields>
 auto make_tagged_tuple(Fields&&... fields) {
     return helper::make_tagged_tuple_helper(std::move(fields)...);
 }
+
+template <class T>
+constexpr bool is_tagged_tuple = std::is_base_of<TaggedTupleTag, T>::value;
