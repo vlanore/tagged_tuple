@@ -64,6 +64,7 @@ namespace helper {
     std::string ttuple_type_info_helper(std::tuple<type_map::Pair<Tag, Value>, Rest...>,
                                         Type<TTuple>) {
         std::string type_str = type_to_string<Value>();
+        if (std::is_reference<Value>::value) { type_str += "&"; }
         std::string tag_str = type_to_string<Tag>();
         std::string other_fields = ttuple_type_info_helper(std::tuple<Rest...>(), Type<TTuple>());
         return type_str + " " + tag_str + "; " + other_fields;
@@ -72,7 +73,7 @@ namespace helper {
     template <class... Pairs>
     std::string ttuple_type_info_extract_types(Type<tagged_tuple_t<type_map::Map<Pairs...>>>) {
         using TTuple = tagged_tuple_t<type_map::Map<Pairs...>>;
-        return "{ " +
+        return "tagged_tuple { " +
                helper::ttuple_type_info_helper(std::tuple<Pairs...>(), helper::Type<TTuple>()) +
                "}";
     }

@@ -159,14 +159,14 @@ TEST_CASE("struct printing") {
     using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
     tuple_t t(1, 3.2);
     std::string debug = type_to_string(t);
-    CHECK(debug == "{ int alpha; double beta; }");
+    CHECK(debug == "tagged_tuple { int alpha; double beta; }");
 }
 
 TEST_CASE("Struct printing with non-default constructible stuff") {
     double a = 3.2;
     using inner = tagged_tuple<field<alpha, double&>>;
     tagged_tuple<field<beta, inner>> t(a);
-    CHECK(type_to_string(t) == "{ { double alpha; } beta; }");  // FIXME should be double&
+    CHECK(type_to_string(t) == "tagged_tuple { tagged_tuple { double& alpha; } beta; }");
 }
 
 TEST_CASE("recursive struct printing") {
@@ -176,5 +176,7 @@ TEST_CASE("recursive struct printing") {
     t.get<alpha>() = tuple_t(2, 3.9);
     t.get<beta>() = tuple_t(0, 3.2);
     std::string debug = type_to_string(t);
-    CHECK(debug == "{ { int alpha; double beta; } alpha; { int alpha; double beta; } beta; }");
+    CHECK(debug ==
+          "tagged_tuple { tagged_tuple { int alpha; double beta; } alpha; tagged_tuple { int "
+          "alpha; double beta; } beta; }");
 }
