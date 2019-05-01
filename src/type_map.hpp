@@ -76,27 +76,30 @@ namespace type_map {
         }
 
         template <class Key, class Type>
-        // type alias for the result of the add function
-        using add = decltype(Map<Pair<Key, Type>, Decls...>());
+        // type alias for the result of the push_front function
+        using push_front = decltype(Map<Pair<Key, Type>, Decls...>());
 
         struct helper {
             template <class... Types>
+            // to carry around a list of types without the
+            // default-initialization problems of std::tuple
             struct TypeList {
                 using tuple = std::tuple<Types...>;
 
                 template <class Type>
-                using add = TypeList<Type, Types...>;
+                auto push_front() {
+                    return TypeList<Type, Types...>();
+                }
             };
 
+            // base case of helper below
             static auto value_tuple_helper(tuple<>) { return TypeList<>(); }
 
             template <class Key, class Value, class... Rest>
+            // goes through the list of Key/Value pairs and compiles a list of Values
             static auto value_tuple_helper(tuple<Pair<Key, Value>, Rest...>) {
                 auto recursive_call = value_tuple_helper(tuple<Rest...>());
-                // added move so it would compile with unique_ptrs (never actually instantiated
-                // anyway)
-                using return_type = typename decltype(recursive_call)::template add<Value>;
-                return return_type();
+                return recursive_call.push_front<Value>();
             }
         };
 
@@ -109,6 +112,7 @@ namespace type_map {
         // returns tag associated with index
         using get_tag = typename std::tuple_element_t<index, tuple<Decls...>>::tag;
 
+        // number of entries in map (static int)
         static constexpr size_t size() { return sizeof...(Decls); }
 
         template <class Tag>

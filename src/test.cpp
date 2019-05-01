@@ -53,7 +53,7 @@ TEST_CASE("Type map") {
     using tuple_t = my_map::value_tuple_t;
     CHECK((std::is_same<tuple<int, double>, tuple_t>::value));
 
-    using my_map2 = my_map::add<prop3, string>;
+    using my_map2 = my_map::push_front<prop3, string>;
     using prop3_t = typename my_map2::get<prop3>;
     CHECK((std::is_same<prop3_t, string>::value));
     CHECK(my_map2::get_index<prop3>() == 0);  // added in front

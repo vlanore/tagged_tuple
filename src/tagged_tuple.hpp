@@ -78,7 +78,7 @@ namespace helper {
     template <class Tag, class TTuple, class Type, size_t... Is>
     auto push_front_helper(TTuple& t, Type&& new_data, std::index_sequence<Is...>) {
         using old_tagmap = typename TTuple::tag_map;
-        using new_tagmap = typename old_tagmap::template add<Tag, Type>;
+        using new_tagmap = typename old_tagmap::template push_front<Tag, Type>;
         // important: this moves old data (e.g., in case of unique_ptr  )
         return tagged_tuple_t<new_tagmap>(std::forward<Type>(new_data),
                                           std::move(std::get<Is>(t.data))...);
@@ -107,7 +107,7 @@ namespace helper {
     template <class Tag, class Type, class... Rest>
     auto map_from_fields(tuple<field<Tag, Type>, Rest...>) {
         using recursive_call = decltype(map_from_fields(tuple<Rest...>()));
-        using add_field = typename recursive_call::template add<Tag, Type>;
+        using add_field = typename recursive_call::template push_front<Tag, Type>;
         return add_field();
     }
 };  // namespace helper
