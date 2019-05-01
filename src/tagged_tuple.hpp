@@ -69,11 +69,10 @@ struct tagged_tuple_t : TaggedTupleTag {
     const auto& get() const {
         return get<First>().template get<Second, Rest...>();
     }
-
-    template <class Tag>
-    using type_of = typename std::remove_reference<decltype(
-        std::get<TagMap::template get_index<Tag>()>(std::declval<tuple_t>()))>::type;
 };
+
+// template <class Tag, class TTuple>
+// using type_of = std::get< TTuple::tag_map::
 
 namespace helper {
     template <class Tag, class TTuple, class Type, size_t... Is>

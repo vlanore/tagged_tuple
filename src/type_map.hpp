@@ -34,6 +34,7 @@ namespace type_map {
     template <class Tag, class Type>
     struct Pair {
         using tag = Tag;
+        using type = Type;
     };
 
     // to be used as return value when key not found in map
@@ -109,5 +110,9 @@ namespace type_map {
             std::get<index>(std::declval<tuple<Decls...>>()))>::type::tag;
 
         static constexpr size_t size() { return sizeof...(Decls); }
+
+        template <class Tag>
+        using type_of = decltype(std::get<get_index<Tag>()>(std::declval<value_tuple_t>()));
     };
+
 };  // namespace type_map
