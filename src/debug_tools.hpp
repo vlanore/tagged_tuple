@@ -47,30 +47,42 @@ template <class T>
 static std::string type_to_string();
 
 namespace helper {
+    template <class T>
+    struct Type {};
+
     template <class TTuple>
-    std::string tuple_to_string_helper(std::tuple<>, TTuple&) {
+    std::string ttuple_type_info_helper(std::tuple<>, Type<TTuple>) {
         return "";
     }
 
     template <class Tag, class Value, class... Rest, class TTuple>
-    std::string tuple_to_string_helper(std::tuple<type_map::Pair<Tag, Value>, Rest...>, TTuple& t) {
+    std::string ttuple_type_info_helper(std::tuple<type_map::Pair<Tag, Value>, Rest...>,
+                                        Type<TTuple>) {
         std::string type_str = type_to_string<Value>();
         std::string tag_str = type_to_string<Tag>();
-        std::string other_fields = tuple_to_string_helper(std::tuple<Rest...>(), t);
+        std::string other_fields = ttuple_type_info_helper(std::tuple<Rest...>(), Type<TTuple>());
         return type_str + " " + tag_str + "; " + other_fields;
+    }
+
+    template <class... Pairs>
+    std::string ttuple_type_info_extract_types(Type<tagged_tuple_t<type_map::Map<Pairs...>>>) {
+        using TTuple = tagged_tuple_t<type_map::Map<Pairs...>>;
+        return "{ " +
+               helper::ttuple_type_info_helper(std::tuple<Pairs...>(), helper::Type<TTuple>()) +
+               "}";
     }
 
 };  // namespace helper
 
-template <class... Pairs>
-std::string tuple_to_string(const tagged_tuple_t<type_map::Map<Pairs...>>& t) {
-    return "{ " + helper::tuple_to_string_helper(std::tuple<Pairs...>(), t) + "}";
+template <class TTuple>
+std::string tagged_tuple_type_info(const TTuple&) {
+    return helper::ttuple_type_info_extract_types(helper::Type<TTuple>());
 }
 
 namespace helper {
     template <class T>
     std::string tagged_tuple_selector(std::true_type) {
-        return tuple_to_string(T());  // FIXME what if not default_construbtible?
+        return helper::ttuple_type_info_extract_types(helper::Type<T>());
     }
 
     template <class T>
