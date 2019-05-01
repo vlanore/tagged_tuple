@@ -106,13 +106,14 @@ namespace type_map {
             typename decltype(helper::value_tuple_helper(tuple<Decls...>()))::tuple;
 
         template <int index>
-        using get_tag = typename std::remove_reference<decltype(
-            std::get<index>(std::declval<tuple<Decls...>>()))>::type::tag;
+        // returns tag associated with index
+        using get_tag = typename std::tuple_element_t<index, tuple<Decls...>>::tag;
 
         static constexpr size_t size() { return sizeof...(Decls); }
 
         template <class Tag>
-        using type_of = typename std::tuple_element<get_index<Tag>(), value_tuple_t>::type;
+        // alias to type of field associated to specified tag
+        using type_of = typename std::tuple_element_t<get_index<Tag>(), value_tuple_t>;
     };
 
 };  // namespace type_map
