@@ -166,7 +166,7 @@ TEST_CASE("Struct printing with non-default constructible stuff") {
     double a = 3.2;
     using inner = tagged_tuple<field<alpha, double&>>;
     tagged_tuple<field<beta, inner>> t(a);
-    std::cout << type_to_string(t) << std::endl;
+    CHECK(type_to_string(t) == "{ { double alpha; } beta; }");  // FIXME should be double&
 }
 
 TEST_CASE("recursive struct printing") {
