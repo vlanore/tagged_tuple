@@ -74,6 +74,8 @@ TEST_CASE("Type map type_of") {
     using namespace type_map;
     using my_map = Map<Pair<prop1, int&>, Pair<prop2, double>>;
     CHECK((std::is_same<my_map::type_of<prop1>, int&>::value));
+    std::cout << type_to_string<my_map::type_of<prop2>>() << std::endl;
+    CHECK((std::is_same<my_map::type_of<prop2>, double>::value));
 }
 
 struct alpha {};

@@ -112,7 +112,7 @@ namespace type_map {
         static constexpr size_t size() { return sizeof...(Decls); }
 
         template <class Tag>
-        using type_of = decltype(std::get<get_index<Tag>()>(std::declval<value_tuple_t>()));
+        using type_of = typename std::tuple_element<get_index<Tag>(), value_tuple_t>::type;
     };
 
 };  // namespace type_map
