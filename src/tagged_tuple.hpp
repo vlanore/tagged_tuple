@@ -77,7 +77,7 @@ struct tagged_tuple_t : TaggedTupleTag {
 
 namespace helper {
     template <class Tag, class TTuple, class Type, size_t... Is>
-    auto expand_helper(TTuple& t, Type&& new_data, std::index_sequence<Is...>) {
+    auto push_front_helper(TTuple& t, Type&& new_data, std::index_sequence<Is...>) {
         using old_tagmap = typename TTuple::tag_map;
         using new_tagmap = typename old_tagmap::template add<Tag, Type>;
         // important: this moves old data (e.g., in case of unique_ptr  )
@@ -89,12 +89,13 @@ namespace helper {
 template <class Tag, class Type, class TTuple>
 // adds a field to the struct and returns a new struct
 // WARNING: might invalidate old struct by moving its contents to new struct!
-auto expand(TTuple& t, Type&& new_data) {
-    // build index sequence to be abl to unpack tuple into tagged_tuple_t constructor
-    // unpacking happens in helper
+auto push_front(TTuple& t, Type&& new_data) {
     using underlying_tuple_t = typename TTuple::tuple_t;
+
+    // build index sequence to be able to unpack tuple into tagged_tuple_t constructor
+    // unpacking happens in helper
     auto is = std::make_index_sequence<std::tuple_size<underlying_tuple_t>::value>();
-    return helper::expand_helper<Tag>(t, std::forward<Type>(new_data), is);
+    return helper::push_front_helper<Tag>(t, std::forward<Type>(new_data), is);
 }
 
 template <class Tag, class Type>
@@ -142,7 +143,7 @@ namespace helper {
     template <class Tag, class Type, class... Rest>
     auto make_tagged_tuple_helper(TagValuePair<Tag, Type> f1, Rest&&... rest) {
         auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
-        return expand<Tag>(recursive_call, std::move(f1.data));
+        return push_front<Tag>(recursive_call, std::move(f1.data));
     }
 };  // namespace helper
 

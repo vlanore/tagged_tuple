@@ -96,12 +96,12 @@ TEST_CASE("tagged_tuple typedef") {
     CHECK(my_tuple.get<beta>() == "hello");
 }
 
-TEST_CASE("expand tagged tuple") {
+TEST_CASE("push_front tagged tuple") {
     tagged_tuple<field<alpha, int>> t1(17);
-    auto t2 = expand<beta>(t1, 2.3);
+    auto t2 = push_front<beta>(t1, 2.3);
     CHECK(t2.get<alpha>() == 17);
     CHECK(t2.get<beta>() == 2.3);
-    auto t3 = expand<struct gamma, std::string>(t2, "hello");
+    auto t3 = push_front<struct gamma, std::string>(t2, "hello");
     CHECK(t3.get<alpha>() == 17);
     CHECK(t3.get<beta>() == 2.3);
     CHECK(t3.get<gamma>() == "hello");
@@ -113,7 +113,7 @@ TEST_CASE("Test with unique_ptrs") {
     CHECK(*t1.get<alpha>() == 2.3);
     CHECK(t1.get<beta>() == 3);
 
-    auto t2 = expand<struct gamma, std::unique_ptr<std::string>>(
+    auto t2 = push_front<struct gamma, std::unique_ptr<std::string>>(
         t1, std::make_unique<std::string>("hello"));
     CHECK(t1.get<alpha>() == nullptr);
     CHECK(*t2.get<alpha>() == 2.3);
