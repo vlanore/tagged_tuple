@@ -46,6 +46,11 @@ static std::string demangle(const char* name) { return name; }
 template <class T>
 static std::string type_to_string();
 
+template <class T>
+static std::string type_to_string(T&) {
+    return type_to_string<T>();
+}
+
 namespace helper {
     template <class T>
     struct Type {};
@@ -73,11 +78,6 @@ namespace helper {
     }
 
 };  // namespace helper
-
-template <class TTuple>
-std::string tagged_tuple_type_info(const TTuple&) {
-    return helper::ttuple_type_info_extract_types(helper::Type<TTuple>());
-}
 
 namespace helper {
     template <class T>
