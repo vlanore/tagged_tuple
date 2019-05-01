@@ -70,28 +70,32 @@ struct tagged_tuple_t : TaggedTupleTag {
         return get<First>().template get<Second, Rest...>();
     }
 
-    template <class Tag, class Type, size_t... Is>
-    auto expand_helper(Type&& new_data, std::index_sequence<Is...>) {
-        using new_tagmap = typename TagMap::template add<Tag, Type>;
-        // important: this moves old data (e.g., in case of unique_ptr  )
-        return tagged_tuple_t<new_tagmap>(std::forward<Type>(new_data),
-                                          std::move(std::get<Is>(data))...);
-    }
-
-    template <class Tag, class Type>
-    // adds a field to the struct and returns a new struct
-    // WARNING: might invalidate old struct by moving its contents to new struct!
-    auto expand(Type&& new_data) {
-        // build index sequence to be abl to unpack tuple into tagged_tuple_t constructor
-        // unpacking happens in helper
-        auto is = std::make_index_sequence<std::tuple_size<tuple_t>::value>();
-        return expand_helper<Tag>(std::forward<Type>(new_data), is);
-    }
-
     template <class Tag>
     using type_of = typename std::remove_reference<decltype(
         std::get<TagMap::template get_index<Tag>()>(std::declval<tuple_t>()))>::type;
 };
+
+namespace helper {
+    template <class Tag, class TTuple, class Type, size_t... Is>
+    auto expand_helper(TTuple& t, Type&& new_data, std::index_sequence<Is...>) {
+        using old_tagmap = typename TTuple::tag_map;
+        using new_tagmap = typename old_tagmap::template add<Tag, Type>;
+        // important: this moves old data (e.g., in case of unique_ptr  )
+        return tagged_tuple_t<new_tagmap>(std::forward<Type>(new_data),
+                                          std::move(std::get<Is>(t.data))...);
+    }
+};  // namespace helper
+
+template <class Tag, class Type, class TTuple>
+// adds a field to the struct and returns a new struct
+// WARNING: might invalidate old struct by moving its contents to new struct!
+auto expand(TTuple& t, Type&& new_data) {
+    // build index sequence to be abl to unpack tuple into tagged_tuple_t constructor
+    // unpacking happens in helper
+    using underlying_tuple_t = typename TTuple::tuple_t;
+    auto is = std::make_index_sequence<std::tuple_size<underlying_tuple_t>::value>();
+    return helper::expand_helper<Tag>(t, std::forward<Type>(new_data), is);
+}
 
 template <class Tag, class Type>
 // to be used in field list declaration
@@ -138,7 +142,7 @@ namespace helper {
     template <class Tag, class Type, class... Rest>
     auto make_tagged_tuple_helper(TagValuePair<Tag, Type> f1, Rest&&... rest) {
         auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
-        return recursive_call.template expand<Tag>(std::move(f1.data));
+        return expand<Tag>(recursive_call, std::move(f1.data));
     }
 };  // namespace helper
 
