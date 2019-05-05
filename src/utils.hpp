@@ -45,7 +45,7 @@ namespace utils {
         using tuple = std::tuple<Types...>;
 
         template <class Type>
-        auto push_front() {
+        auto add_type_front() {
             return TypeList<Type, Types...>();
         }
     };

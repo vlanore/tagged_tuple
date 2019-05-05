@@ -78,7 +78,7 @@ namespace type_map {
         // goes through the list of Key/Value pairs and compiles a list of Values
         static auto value_tuple_helper(tuple<utils::Pair<Key, Value>, Rest...>) {
             auto recursive_call = value_tuple_helper(tuple<Rest...>());
-            return recursive_call.template push_front<Value>();
+            return recursive_call.template add_type_front<Value>();
         }
 
         // type alias that corresponds to a tuple of all the values
