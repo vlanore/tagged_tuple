@@ -61,7 +61,7 @@ namespace helper {
     }
 
     template <class Tag, class Value, class... Rest, class TTuple>
-    std::string ttuple_type_info_helper(std::tuple<type_map::Pair<Tag, Value>, Rest...>,
+    std::string ttuple_type_info_helper(std::tuple<utils::Pair<Tag, Value>, Rest...>,
                                         Type<TTuple>) {
         std::string type_str = type_to_string<Value>();
         if (std::is_reference<Value>::value) { type_str += "&"; }

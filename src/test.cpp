@@ -38,7 +38,7 @@ struct prop3 {};
 
 TEST_CASE("Type map") {
     using namespace type_map;
-    using my_map = Map<Pair<prop1, int>, Pair<prop2, double>>;
+    using my_map = Map<utils::Pair<prop1, int>, utils::Pair<prop2, double>>;
     using prop1_t = typename my_map::get<prop1>;
     using prop2_t = typename my_map::get<prop2>;
     constexpr int i1 = my_map::get_index<prop1>();
@@ -63,7 +63,7 @@ TEST_CASE("Type map") {
 
 TEST_CASE("type map index to tag") {
     using namespace type_map;
-    using my_map = Map<Pair<prop1, int>, Pair<prop2, double>>;
+    using my_map = Map<utils::Pair<prop1, int>, utils::Pair<prop2, double>>;
     using tag1 = my_map::get_tag<0>;
     using tag2 = my_map::get_tag<1>;
     CHECK((std::is_same<tag1, prop1>::value));
@@ -72,7 +72,7 @@ TEST_CASE("type map index to tag") {
 
 TEST_CASE("Type map type_of") {
     using namespace type_map;
-    using my_map = Map<Pair<prop1, int&>, Pair<prop2, double>>;
+    using my_map = Map<utils::Pair<prop1, int&>, utils::Pair<prop2, double>>;
     CHECK((std::is_same<my_map::type_of<prop1>, int&>::value));
     std::cout << type_to_string<my_map::type_of<prop2>>() << std::endl;
     CHECK((std::is_same<my_map::type_of<prop2>, double>::value));
@@ -84,7 +84,7 @@ struct gamma_ {};
 
 TEST_CASE("Direct usage of tagged_tuple_t") {
     using namespace type_map;
-    using my_map = Map<Pair<alpha, int>, Pair<beta, string>>;
+    using my_map = Map<utils::Pair<alpha, int>, utils::Pair<beta, string>>;
     using my_tuple_t = tagged_tuple_t<my_map>;
 
     my_tuple_t my_tuple{2, "hello"};

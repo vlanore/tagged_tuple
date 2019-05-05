@@ -27,18 +27,10 @@ license and that you accept its terms.*/
 #pragma once
 
 #include <tuple>
+#include "utils.hpp"
 using std::tuple;
 
 namespace type_map {
-    // represents a pair of types
-    template <class Tag, class Type>
-    struct Pair {
-        using tag = Tag;
-        using type = Type;
-    };
-
-    // to be used as return value when key not found in map
-    struct NotFound {};
 
     template <class... Decls>
     struct Map {
@@ -52,12 +44,12 @@ namespace type_map {
         template <class Key, int index>
         // helper to recursively look for key in map (base case)
         static auto get_helper(tuple<>) {
-            return NotFound();
+            return utils::NotFound();
         }
 
         template <class RequestedKey, int index, class Key, class Value, class... DeclRest>
         // helper to recursively look for key in map
-        static auto get_helper(tuple<Pair<Key, Value>, DeclRest...>) {
+        static auto get_helper(tuple<utils::Pair<Key, Value>, DeclRest...>) {
             using if_equal = GetReturn<Value, index>;
             using if_not_equal =
                 decltype(get_helper<RequestedKey, index + 1>(tuple<DeclRest...>()));
@@ -77,36 +69,21 @@ namespace type_map {
 
         template <class Key, class Type>
         // type alias for the result of the push_front function
-        using push_front = decltype(Map<Pair<Key, Type>, Decls...>());
+        using push_front = decltype(Map<utils::Pair<Key, Type>, Decls...>());
 
-        struct helper {
-            template <class... Types>
-            // to carry around a list of types without the
-            // default-initialization problems of std::tuple
-            struct TypeList {
-                using tuple = std::tuple<Types...>;
+        // base case of helper below
+        static auto value_tuple_helper(tuple<>) { return utils::TypeList<>(); }
 
-                template <class Type>
-                auto push_front() {
-                    return TypeList<Type, Types...>();
-                }
-            };
-
-            // base case of helper below
-            static auto value_tuple_helper(tuple<>) { return TypeList<>(); }
-
-            template <class Key, class Value, class... Rest>
-            // goes through the list of Key/Value pairs and compiles a list of Values
-            static auto value_tuple_helper(tuple<Pair<Key, Value>, Rest...>) {
-                auto recursive_call = value_tuple_helper(tuple<Rest...>());
-                return recursive_call.template push_front<Value>();
-            }
-        };
+        template <class Key, class Value, class... Rest>
+        // goes through the list of Key/Value pairs and compiles a list of Values
+        static auto value_tuple_helper(tuple<utils::Pair<Key, Value>, Rest...>) {
+            auto recursive_call = value_tuple_helper(tuple<Rest...>());
+            return recursive_call.template push_front<Value>();
+        }
 
         // type alias that corresponds to a tuple of all the values
         // (to be used in tagged tuple, at least)
-        using value_tuple_t =
-            typename decltype(helper::value_tuple_helper(tuple<Decls...>()))::tuple;
+        using value_tuple_t = typename decltype(value_tuple_helper(tuple<Decls...>()))::tuple;
 
         template <int index>
         // returns tag associated with index
