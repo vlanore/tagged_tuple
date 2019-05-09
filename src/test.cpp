@@ -145,11 +145,13 @@ TEST_CASE("make_tagged_tuple") {
 
 TEST_CASE("make_tagged_tuple ref/nonref") {
     int a{17}, b{19};
-    auto t = make_tagged_tuple(value_field<alpha>(a), ref_field<beta>(b));
+    auto t = make_tagged_tuple(value_field<alpha>(a), ref_field<beta>(b),
+                               unique_ptr_field<struct gamma>(21));
     a = 7;
     b = 9;
     CHECK(t.get<alpha>() == 17);
     CHECK(t.get<beta>() == 9);
+    CHECK(*t.get<gamma>() == 21);
 }
 
 TEST_CASE("type_of") {
