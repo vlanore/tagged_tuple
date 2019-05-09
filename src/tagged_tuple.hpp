@@ -132,16 +132,14 @@ const auto& tagged_tuple_t<TagMap>::get() const {
 // push_front
 
 namespace helper {
-    // move if unique_ptr, forward otherwise
-    template <class Type>
-    auto&& forward_or_move(std::unique_ptr<Type>& ptr) {
-        return std::move(ptr);
+    template <class T>
+    auto& copy_or_move(utils::Type<T&>, T& ref) {
+        return ref;
     }
 
-    // move if unique_ptr, forward otherwise
-    template <class Type>
-    auto&& forward_or_move(Type&& rhs) {
-        return std::forward<Type>(rhs);
+    template <class T>
+    auto&& copy_or_move(utils::Type<T>, T& ref) {
+        return std::move(ref);
     }
 
     template <class Tag, class TTuple, class Type, size_t... Is>
@@ -149,8 +147,10 @@ namespace helper {
         using old_tagmap = typename TTuple::tag_map;
         using new_tagmap = typename old_tagmap::template push_front<Tag, Type>;
         // important: this moves unique pointers
-        return tagged_tuple_t<new_tagmap>(ForwardToTupleConstructor(), std::forward<Type>(new_data),
-                                          forward_or_move(std::get<Is>(t.data))...);
+        return tagged_tuple_t<new_tagmap>(
+            ForwardToTupleConstructor(), std::forward<Type>(new_data),
+            copy_or_move(utils::Type<std::tuple_element_t<Is, typename TTuple::tuple_t>>(),
+                         std::get<Is>(t.data))...);
     }
 };  // namespace helper
 
