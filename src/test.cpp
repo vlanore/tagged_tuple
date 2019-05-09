@@ -141,11 +141,11 @@ TEST_CASE("make_tagged_tuple") {
 }
 
 TEST_CASE("type_of") {
-    // using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
-    // using alpha_t = tuple_t::type_of<alpha>;
-    // using beta_t = tuple_t::type_of<beta>;
-    // CHECK((std::is_same<alpha_t, int>::value));
-    // CHECK((std::is_same<beta_t, double>::value));
+    using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
+    using alpha_t = tuple_t::type_of<alpha>;
+    using beta_t = tuple_t::type_of<beta>;
+    CHECK((std::is_same<alpha_t, int>::value));
+    CHECK((std::is_same<beta_t, double>::value));
 }
 
 TEST_CASE("recursive tagged tuple") {

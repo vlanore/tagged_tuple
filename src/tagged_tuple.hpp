@@ -62,6 +62,10 @@ struct tagged_tuple_t : TaggedTupleTag {
     // recursive version of getter (for tagged tuple parameters)
     template <class First, class Second, class... Rest>
     const auto& get() const;
+
+    // type of field
+    template <class Tag>
+    using type_of = std::tuple_element_t<tag_map::template get_index<Tag>(), tuple_t>;
 };
 
 //==================================================================================================
@@ -96,9 +100,6 @@ template <class First, class Second, class... Rest>
 const auto& tagged_tuple_t<TagMap>::get() const {
     return get<First>().template get<Second, Rest...>();
 }
-
-//==================================================================================================
-// type_of
 
 //==================================================================================================
 // push_front
