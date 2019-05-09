@@ -110,18 +110,30 @@ const auto& tagged_tuple_t<TagMap>::get() const {
 // push_front
 
 namespace helper {
+    // move if unique_ptr, forward otherwise
+    template <class Type>
+    auto&& forward_or_move(std::unique_ptr<Type>& ptr) {
+        return std::move(ptr);
+    }
+
+    // move if unique_ptr, forward otherwise
+    template <class Type>
+    auto&& forward_or_move(Type&& rhs) {
+        return std::forward<Type>(rhs);
+    }
+
     template <class Tag, class TTuple, class Type, size_t... Is>
     auto push_front_helper(TTuple& t, Type&& new_data, std::index_sequence<Is...>) {
         using old_tagmap = typename TTuple::tag_map;
         using new_tagmap = typename old_tagmap::template push_front<Tag, Type>;
-        // important: this moves old data (e.g., in case of unique_ptr  )
+        // important: this moves unique pointers
         return tagged_tuple_t<new_tagmap>(ForwardToTupleConstructor(), std::forward<Type>(new_data),
-                                          std::move(std::get<Is>(t.data))...);
+                                          forward_or_move(std::get<Is>(t.data))...);
     }
 };  // namespace helper
 
 // adds a field to the struct and returns a new struct
-// WARNING: might invalidate old struct by moving its contents to new struct
+// WARNING: invalidates (moves) all unique pointers in old struct
 template <class Tag, class Type, class TTuple>
 auto push_front(TTuple& t, Type&& new_data) {
     using underlying_tuple_t = typename TTuple::tuple_t;

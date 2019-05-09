@@ -143,6 +143,15 @@ TEST_CASE("make_tagged_tuple") {
     CHECK(*t2.get<beta>() == 7.2);
 }
 
+TEST_CASE("make_tagged_tuple ref/nonref") {
+    int a{17}, b{19};
+    auto t = make_tagged_tuple(value_field<alpha>(a), ref_field<beta>(b));
+    a = 7;
+    b = 9;
+    CHECK(t.get<alpha>() == 17);
+    CHECK(t.get<beta>() == 9);
+}
+
 TEST_CASE("type_of") {
     using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
     using alpha_t = tuple_t::type_of<alpha>;
