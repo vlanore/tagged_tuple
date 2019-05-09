@@ -45,6 +45,8 @@ struct tagged_tuple_t : TaggedTupleTag {
     tuple_t data;
 
     tagged_tuple_t() = default;
+    tagged_tuple_t(const tagged_tuple_t&) = default;
+    tagged_tuple_t(tagged_tuple_t&&) = default;
 
     template <class... TupleConstructorArgs>
     explicit tagged_tuple_t(ForwardToTupleConstructor, TupleConstructorArgs&&... args)
@@ -159,13 +161,21 @@ using tagged_tuple = tagged_tuple_t<decltype(helper::map_from_fields(tuple<Field
 template <class Tag, class Type>
 struct TagValuePair {
     Type data;
-    TagValuePair(Type&& data) : data(std::forward<Type>(data)) {}
+    template <class InitType>  // might have different ref-ness than type
+    explicit TagValuePair(InitType&& data) : data(std::forward<InitType>(data)) {}
 };
 
 // to be used in make_tagged_tuple calls
 template <class Tag, class Type>
-auto field_from(Type&& data) {
-    return TagValuePair<Tag, Type>(std::forward<Type>(data));
+auto value_field(Type&& data) {
+    using nonref_type = std::remove_reference_t<Type>;
+    return TagValuePair<Tag, nonref_type>{std::forward<Type>(data)};
+}
+
+// to be used in make_tagged_tuple calls
+template <class Tag, class Type>
+auto ref_field(Type& data) {
+    return TagValuePair<Tag, Type&>(data);
 }
 
 // to be used in make_tagged_tuple calls; builds a unique pointer to Type from Type constructor args
@@ -179,9 +189,9 @@ namespace helper {
     auto make_tagged_tuple_helper() { return tagged_tuple<>(); }
 
     template <class Tag, class Type, class... Rest>
-    auto make_tagged_tuple_helper(TagValuePair<Tag, Type> f1, Rest&&... rest) {
+    auto make_tagged_tuple_helper(TagValuePair<Tag, Type>&& f1, Rest&&... rest) {
         auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
-        return push_front<Tag>(recursive_call, std::move(f1.data));
+        return push_front<Tag>(recursive_call, std::forward<Type>(f1.data));
     }
 };  // namespace helper
 

@@ -134,11 +134,11 @@ TEST_CASE("Test with unique_ptrs") {
 
 TEST_CASE("make_tagged_tuple") {
     auto t1 =
-        make_tagged_tuple(field_from<alpha>(3), field_from<beta>(std::make_unique<double>(3.2)));
+        make_tagged_tuple(value_field<alpha>(3), value_field<beta>(std::make_unique<double>(3.2)));
     CHECK(t1.get<alpha>() == 3);
     CHECK(*t1.get<beta>() == 3.2);
 
-    auto t2 = make_tagged_tuple(field_from<alpha>(7), unique_ptr_field<beta>(7.2));
+    auto t2 = make_tagged_tuple(value_field<alpha>(7), unique_ptr_field<beta>(7.2));
     CHECK(t2.get<alpha>() == 7);
     CHECK(*t2.get<beta>() == 7.2);
 }
@@ -152,8 +152,8 @@ TEST_CASE("type_of") {
 }
 
 TEST_CASE("recursive tagged tuple") {
-    auto inner = make_tagged_tuple(field_from<alpha>(2));
-    auto outer = make_tagged_tuple(field_from<beta>(inner));
+    auto inner = make_tagged_tuple(value_field<alpha>(2));
+    auto outer = make_tagged_tuple(value_field<beta>(inner));
     CHECK((outer.get<beta, alpha>() == 2));
 }
 
@@ -175,8 +175,8 @@ TEST_CASE("struct printing") {
 
 TEST_CASE("Struct printing with non-default constructible stuff") {
     double a = 3.2;
-    auto inner = make_tagged_tuple(field_from<alpha>(a));
-    auto outer = make_tagged_tuple(field_from<beta>(inner));
+    auto inner = make_tagged_tuple(ref_field<alpha>(a));
+    auto outer = make_tagged_tuple(value_field<beta>(inner));
     CHECK(type_to_string(outer) == "tagged_tuple { tagged_tuple { double& alpha; } beta; }");
 }
 

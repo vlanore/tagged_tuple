@@ -78,9 +78,6 @@ namespace helper {
                "}";
     }
 
-};  // namespace helper
-
-namespace helper {
     template <class T>
     std::string tagged_tuple_selector(std::true_type) {
         return helper::ttuple_type_info_extract_types(helper::Type<T>());
