@@ -34,6 +34,7 @@ using std::string;
 // Tagged tuple class
 
 struct TaggedTupleTag {};
+struct ForwardToTupleConstructor {};
 
 template <class TagMap>
 // tagged tuple class (just a tuple wrapper with added tags and static funcs)
@@ -43,9 +44,11 @@ struct tagged_tuple_t : TaggedTupleTag {
 
     tuple_t data;
 
-    // constructor that just perfect-forwards arguments to tuple constructor
-    template <class... Args>
-    tagged_tuple_t(Args&&... args) : data(std::forward<Args>(args)...) {}
+    tagged_tuple_t() = default;
+
+    template <class... TupleConstructorArgs>
+    explicit tagged_tuple_t(ForwardToTupleConstructor, TupleConstructorArgs&&... args)
+        : data(std::forward<TupleConstructorArgs>(args)...) {}
 
     // get a field of the tagged tuple by tag (returns a reference)
     template <class Tag>
@@ -110,7 +113,7 @@ namespace helper {
         using old_tagmap = typename TTuple::tag_map;
         using new_tagmap = typename old_tagmap::template push_front<Tag, Type>;
         // important: this moves old data (e.g., in case of unique_ptr  )
-        return tagged_tuple_t<new_tagmap>(std::forward<Type>(new_data),
+        return tagged_tuple_t<new_tagmap>(ForwardToTupleConstructor(), std::forward<Type>(new_data),
                                           std::move(std::get<Is>(t.data))...);
     }
 };  // namespace helper

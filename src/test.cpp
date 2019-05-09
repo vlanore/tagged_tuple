@@ -87,25 +87,28 @@ TEST_CASE("Direct usage of tagged_tuple_t") {
     using my_map = Map<utils::Pair<alpha, int>, utils::Pair<beta, string>>;
     using my_tuple_t = tagged_tuple_t<my_map>;
 
-    my_tuple_t my_tuple{2, "hello"};
+    my_tuple_t my_tuple;
+    my_tuple.data = std::make_tuple(2, "hello");
     CHECK(my_tuple.get<alpha>() == 2);
     CHECK(my_tuple.get<beta>() == "hello");
 
-    const my_tuple_t my_const_tuple{3, "hi"};
-    CHECK(my_const_tuple.get<alpha>() == 3);
-    CHECK(my_const_tuple.get<beta>() == "hi");
+    const auto& my_const_tuple = my_tuple;
+    CHECK(my_const_tuple.get<alpha>() == 2);
+    CHECK(my_const_tuple.get<beta>() == "hello");
 }
 
 TEST_CASE("tagged_tuple typedef") {
     using my_tuple_t = tagged_tuple<field<alpha, int>, field<beta, string>>;
 
-    my_tuple_t my_tuple{2, "hello"};  // FIXME order reversed!
+    my_tuple_t my_tuple;
+    my_tuple.data = std::make_tuple(2, "hello");  // FIXME order reversed!
     CHECK(my_tuple.get<alpha>() == 2);
     CHECK(my_tuple.get<beta>() == "hello");
 }
 
 TEST_CASE("push_front tagged tuple") {
-    tagged_tuple<field<alpha, int>> t1(17);
+    tagged_tuple<field<alpha, int>> t1;
+    t1.data = std::make_tuple(17);
     auto t2 = push_front<beta>(t1, 2.3);
     CHECK(t2.get<alpha>() == 17);
     CHECK(t2.get<beta>() == 2.3);
@@ -116,8 +119,8 @@ TEST_CASE("push_front tagged tuple") {
 }
 
 TEST_CASE("Test with unique_ptrs") {
-    tagged_tuple<field<beta, int>, field<alpha, std::unique_ptr<double>>> t1(
-        3, std::make_unique<double>(2.3));
+    tagged_tuple<field<beta, int>, field<alpha, std::unique_ptr<double>>> t1;
+    t1.data = std::make_tuple(3, std::make_unique<double>(2.3));
     CHECK(*t1.get<alpha>() == 2.3);
     CHECK(t1.get<beta>() == 3);
 
@@ -149,10 +152,9 @@ TEST_CASE("type_of") {
 }
 
 TEST_CASE("recursive tagged tuple") {
-    using tuple_t = tagged_tuple<field<alpha, int>>;
-    using tuple2_t = tagged_tuple<field<beta, tuple_t>>;
-    tuple2_t t{2};
-    CHECK((t.get<beta, alpha>() == 2));
+    auto inner = make_tagged_tuple(field_from<alpha>(2));
+    auto outer = make_tagged_tuple(field_from<beta>(inner));
+    CHECK((outer.get<beta, alpha>() == 2));
 }
 
 TEST_CASE("is_tagged_tuple") {
@@ -165,24 +167,25 @@ TEST_CASE("basic type printing") { CHECK(type_to_string<alpha>() == "alpha"); }
 
 TEST_CASE("struct printing") {
     using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
-    tuple_t t(1, 3.2);
+    tuple_t t;
+    t.data = std::make_tuple(1, 3.2);
     std::string debug = type_to_string(t);
     CHECK(debug == "tagged_tuple { int alpha; double beta; }");
 }
 
 TEST_CASE("Struct printing with non-default constructible stuff") {
     double a = 3.2;
-    using inner = tagged_tuple<field<alpha, double&>>;
-    tagged_tuple<field<beta, inner>> t(a);
-    CHECK(type_to_string(t) == "tagged_tuple { tagged_tuple { double& alpha; } beta; }");
+    auto inner = make_tagged_tuple(field_from<alpha>(a));
+    auto outer = make_tagged_tuple(field_from<beta>(inner));
+    CHECK(type_to_string(outer) == "tagged_tuple { tagged_tuple { double& alpha; } beta; }");
 }
 
 TEST_CASE("recursive struct printing") {
     using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
     using tuple2_t = tagged_tuple<field<alpha, tuple_t>, field<beta, tuple_t>>;
     tuple2_t t;
-    t.get<alpha>() = tuple_t(2, 3.9);
-    t.get<beta>() = tuple_t(0, 3.2);
+    t.get<alpha>().data = std::make_tuple(2, 3.9);
+    t.get<beta>().data = std::make_tuple(0, 3.2);
     std::string debug = type_to_string(t);
     CHECK(debug ==
           "tagged_tuple { tagged_tuple { int alpha; double beta; } alpha; tagged_tuple { int "
