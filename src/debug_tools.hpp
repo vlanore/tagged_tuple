@@ -32,6 +32,9 @@ license and that you accept its terms.*/
 
 #include "tagged_tuple.hpp"
 
+//==================================================================================================
+// type id demangling
+
 #ifdef __GNUG__
 static std::string demangle(const char* name) {
     int status{0};
@@ -43,6 +46,9 @@ static std::string demangle(const char* name) {
 static std::string demangle(const char* name) { return name; }
 #endif
 
+//==================================================================================================
+// base interface for type-to-string
+
 template <class T>
 static std::string type_to_string();
 
@@ -50,6 +56,9 @@ template <class T>
 static std::string type_to_string(T&) {
     return type_to_string<T>();
 }
+
+//==================================================================================================
+// ttuple printer
 
 namespace helper {
     template <class T>
@@ -77,6 +86,13 @@ namespace helper {
                helper::ttuple_type_info_helper(std::tuple<Pairs...>(), helper::Type<TTuple>()) +
                "}";
     }
+
+};  // namespace helper
+
+//==================================================================================================
+// selection of type-to-string impl (ttuple or not)
+
+namespace helper {
 
     template <class T>
     std::string tagged_tuple_selector(std::true_type) {

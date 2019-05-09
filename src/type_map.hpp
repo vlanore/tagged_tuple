@@ -31,24 +31,26 @@ license and that you accept its terms.*/
 using std::tuple;
 
 namespace type_map {
-
     template <class... Decls>
     struct Map {
-        template <class Value, int _index>
+        //==========================================================================================
+        // get / get_index
+
         // return of get_helper
+        template <class Value, int _index>
         struct GetReturn {
             using value = Value;
             static constexpr int index = _index;
         };
 
-        template <class Key, int index>
         // helper to recursively look for key in map (base case)
+        template <class Key, int index>
         static auto get_helper(tuple<>) {
             return utils::NotFound();
         }
 
-        template <class RequestedKey, int index, class Key, class Value, class... DeclRest>
         // helper to recursively look for key in map
+        template <class RequestedKey, int index, class Key, class Value, class... DeclRest>
         static auto get_helper(tuple<utils::Pair<Key, Value>, DeclRest...>) {
             using if_equal = GetReturn<Value, index>;
             using if_not_equal =
@@ -57,25 +59,29 @@ namespace type_map {
             return std::conditional_t<equality, if_equal, if_not_equal>();
         }  // note that return value is a default-constructed Value object (FIXME?)
 
-        template <class Key>
         // type alias for the result of the get function
+        template <class Key>
         using get = typename decltype(get_helper<Key, 0>(tuple<Decls...>()))::value;
 
-        template <class Key>
         // type alias for the result of the get function
+        template <class Key>
         static constexpr int get_index() {
             return decltype(get_helper<Key, 0>(tuple<Decls...>()))::index;
         }
 
+        //==========================================================================================
+        // push_front
         template <class Key, class Type>
-        // type alias for the result of the push_front function
         using push_front = decltype(Map<utils::Pair<Key, Type>, Decls...>());
+
+        //==========================================================================================
+        // value_tuple_t (tuple type alias)
 
         // base case of helper below
         static auto value_tuple_helper(tuple<>) { return utils::TypeList<>(); }
 
-        template <class Key, class Value, class... Rest>
         // goes through the list of Key/Value pairs and compiles a list of Values
+        template <class Key, class Value, class... Rest>
         static auto value_tuple_helper(tuple<utils::Pair<Key, Value>, Rest...>) {
             auto recursive_call = value_tuple_helper(tuple<Rest...>());
             return recursive_call.template add_type_front<Value>();
@@ -85,15 +91,18 @@ namespace type_map {
         // (to be used in tagged tuple, at least)
         using value_tuple_t = typename decltype(value_tuple_helper(tuple<Decls...>()))::tuple;
 
-        template <int index>
+        //==========================================================================================
+        // other info on map (index to tag, size, type of field)
+
         // returns tag associated with index
+        template <int index>
         using get_tag = typename std::tuple_element_t<index, tuple<Decls...>>::tag;
 
         // number of entries in map (static int)
         static constexpr size_t size() { return sizeof...(Decls); }
 
-        template <class Tag>
         // alias to type of field associated to specified tag
+        template <class Tag>
         using type_of = typename std::tuple_element_t<get_index<Tag>(), value_tuple_t>;
     };
 
