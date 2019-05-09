@@ -49,4 +49,7 @@ namespace utils {
             return TypeList<Type, Types...>();
         }
     };
+
+    template <class T>
+    struct Type {};
 };  // namespace utils

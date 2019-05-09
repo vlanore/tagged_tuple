@@ -73,7 +73,6 @@ namespace helper {
     std::string ttuple_type_info_helper(std::tuple<utils::Pair<Tag, Value>, Rest...>,
                                         Type<TTuple>) {
         std::string type_str = type_to_string<Value>();
-        if (std::is_reference<Value>::value) { type_str += "&"; }
         std::string tag_str = type_to_string<Tag>();
         std::string other_fields = ttuple_type_info_helper(std::tuple<Rest...>(), Type<TTuple>());
         return type_str + " " + tag_str + "; " + other_fields;
@@ -90,6 +89,26 @@ namespace helper {
 };  // namespace helper
 
 //==================================================================================================
+// handling references and unique pointers in a pretty way
+
+namespace helper {
+    template <class T>
+    std::string pretty_refs_and_pointers(utils::Type<std::unique_ptr<T>>) {
+        return "unique_ptr<" + demangle(typeid(T).name()) + ">";
+    }
+
+    template <class T>
+    std::string pretty_refs_and_pointers(utils::Type<T&>) {
+        return demangle(typeid(T).name()) + "&";
+    }
+
+    template <class T>
+    std::string pretty_refs_and_pointers(utils::Type<T>) {
+        return demangle(typeid(T).name());
+    }
+};  // namespace helper
+
+//==================================================================================================
 // selection of type-to-string impl (ttuple or not)
 
 namespace helper {
@@ -101,7 +120,7 @@ namespace helper {
 
     template <class T>
     std::string tagged_tuple_selector(std::false_type) {
-        return demangle(typeid(T).name());
+        return helper::pretty_refs_and_pointers(utils::Type<T>());
     }
 };  // namespace helper
 

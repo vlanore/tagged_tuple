@@ -121,26 +121,26 @@ TEST_CASE("push_front tagged tuple") {
 TEST_CASE("Test with unique_ptrs") {
     tagged_tuple<field<beta, int>, field<alpha, std::unique_ptr<double>>> t1;
     t1.data = std::make_tuple(3, std::make_unique<double>(2.3));
-    CHECK(*t1.get<alpha>() == 2.3);
+    CHECK(t1.get<alpha>() == 2.3);
     CHECK(t1.get<beta>() == 3);
 
     auto t2 = push_front<struct gamma, std::unique_ptr<std::string>>(
         t1, std::make_unique<std::string>("hello"));
-    CHECK(t1.get<alpha>() == nullptr);
-    CHECK(*t2.get<alpha>() == 2.3);
+    // CHECK(t1.get<alpha>() == nullptr); // segfaults (as expected)
+    CHECK(t2.get<alpha>() == 2.3);
     CHECK(t2.get<beta>() == 3);
-    CHECK(*t2.get<gamma>() == "hello");
+    CHECK(t2.get<gamma>() == "hello");
 }
 
 TEST_CASE("make_tagged_tuple") {
     auto t1 =
         make_tagged_tuple(value_field<alpha>(3), value_field<beta>(std::make_unique<double>(3.2)));
     CHECK(t1.get<alpha>() == 3);
-    CHECK(*t1.get<beta>() == 3.2);
+    CHECK(t1.get<beta>() == 3.2);
 
     auto t2 = make_tagged_tuple(value_field<alpha>(7), unique_ptr_field<beta>(7.2));
     CHECK(t2.get<alpha>() == 7);
-    CHECK(*t2.get<beta>() == 7.2);
+    CHECK(t2.get<beta>() == 7.2);
 }
 
 TEST_CASE("make_tagged_tuple ref/nonref") {
@@ -151,7 +151,7 @@ TEST_CASE("make_tagged_tuple ref/nonref") {
     b = 9;
     CHECK(t.get<alpha>() == 17);
     CHECK(t.get<beta>() == 9);
-    CHECK(*t.get<gamma>() == 21);
+    CHECK(t.get<gamma>() == 21);
 }
 
 TEST_CASE("type_of") {
@@ -189,6 +189,11 @@ TEST_CASE("Struct printing with non-default constructible stuff") {
     auto inner = make_tagged_tuple(ref_field<alpha>(a));
     auto outer = make_tagged_tuple(value_field<beta>(inner));
     CHECK(type_to_string(outer) == "tagged_tuple { tagged_tuple { double& alpha; } beta; }");
+}
+
+TEST_CASE("Struct printing with unique_pointers") {
+    auto t = make_tagged_tuple(unique_ptr_field<alpha>(3.2));
+    CHECK(type_to_string(t) == "tagged_tuple { unique_ptr<double> alpha; }");
 }
 
 TEST_CASE("recursive struct printing") {

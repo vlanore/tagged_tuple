@@ -76,12 +76,34 @@ struct tagged_tuple_t : TaggedTupleTag {
 //==================================================================================================
 // get element from tag
 
+namespace helper {
+    template <class Type>
+    auto& get_ref(std::unique_ptr<Type>& rhs) {
+        return *rhs;
+    }
+
+    template <class Type>
+    auto& get_ref(Type& rhs) {
+        return rhs;
+    }
+
+    template <class Type>
+    const auto& get_ref(const std::unique_ptr<Type>& rhs) {
+        return *rhs;
+    }
+
+    template <class Type>
+    const auto& get_ref(const Type& rhs) {
+        return rhs;
+    }
+};  // namespace helper
+
 // get a field of the tagged tuple by tag (returns a reference)
 template <class TagMap>
 template <class Tag>
 auto& tagged_tuple_t<TagMap>::get() {
     constexpr int index = TagMap::template get_index<Tag>();
-    return std::get<index>(data);
+    return helper::get_ref(std::get<index>(data));
 }
 
 // get a field of the tagged tuple by tag (returns a constant reference)
@@ -89,7 +111,7 @@ template <class TagMap>
 template <class Tag>
 const auto& tagged_tuple_t<TagMap>::get() const {
     constexpr int index = TagMap::template get_index<Tag>();
-    return std::get<index>(data);
+    return helper::get_ref(std::get<index>(data));
 }
 
 // recursive version of getter (for tagged tuple parameters)
