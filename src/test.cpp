@@ -80,6 +80,7 @@ TEST_CASE("Type map type_of") {
 struct alpha {};
 struct beta {};
 struct gamma_ {};
+struct delta {};
 
 TEST_CASE("Direct usage of tagged_tuple_t") {
     using namespace type_map;
@@ -142,15 +143,17 @@ TEST_CASE("make_tagged_tuple") {
     CHECK(get<beta>(t2) == 7.2);
 }
 
-TEST_CASE("make_tagged_tuple ref/nonref") {
+TEST_CASE("make_tagged_tuple ref/nonref/move") {
+    auto c = std::make_unique<double>(3);
     int a{17}, b{19};
     auto t = make_tagged_tuple(value_field<alpha>(a), ref_field<beta>(b),
-                               unique_ptr_field<struct gamma>(21));
+                               unique_ptr_field<struct gamma>(21), move_field<delta>(c));
     a = 7;
     b = 9;
     CHECK(get<alpha>(t) == 17);
     CHECK(get<beta>(t) == 9);
     CHECK(get<gamma>(t) == 21);
+    CHECK(get<delta>(t) == 3);
 }
 
 TEST_CASE("type_of") {

@@ -234,6 +234,12 @@ auto value_field(Type&& data) {
 
 // to be used in make_tagged_tuple calls
 template <class Tag, class Type>
+auto move_field(Type& data) {
+    return TagValuePair<Tag, Type>{std::move(data)};
+}
+
+// to be used in make_tagged_tuple calls
+template <class Tag, class Type>
 auto ref_field(Type& data) {
     return TagValuePair<Tag, Type&>(data);
 }
