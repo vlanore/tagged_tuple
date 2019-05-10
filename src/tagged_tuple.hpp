@@ -74,6 +74,12 @@ struct tagged_tuple_t : TaggedTupleTag {
 };
 
 //==================================================================================================
+// is_tagged_tuple type trait
+
+template <class T>
+constexpr bool is_tagged_tuple = std::is_base_of<TaggedTupleTag, T>::value;
+
+//==================================================================================================
 // get element from tag
 
 namespace helper {
@@ -99,33 +105,33 @@ namespace helper {
 };  // namespace helper
 
 // get a field of the tagged tuple by tag (returns a reference)
-template <class TagMap>
-template <class Tag>
-auto& tagged_tuple_t<TagMap>::get() {
-    constexpr int index = TagMap::template get_index<Tag>();
-    return helper::get_ref(std::get<index>(data));
+template <class Tag, class TTuple, typename = std::enable_if_t<is_tagged_tuple<TTuple>>>
+auto& get(TTuple& tuple) {
+    constexpr int index = TTuple::tag_map::template get_index<Tag>();
+    return helper::get_ref(std::get<index>(tuple.data));
 }
 
 // get a field of the tagged tuple by tag (returns a constant reference)
-template <class TagMap>
-template <class Tag>
-const auto& tagged_tuple_t<TagMap>::get() const {
-    constexpr int index = TagMap::template get_index<Tag>();
-    return helper::get_ref(std::get<index>(data));
+template <class Tag, class TTuple, typename = std::enable_if_t<is_tagged_tuple<TTuple>>>
+const auto& get(const TTuple& tuple) {
+    constexpr int index = TTuple::tag_map::template get_index<Tag>();
+    return helper::get_ref(std::get<index>(tuple.data));
 }
 
 // recursive version of getter (for tagged tuple parameters)
-template <class TagMap>
-template <class First, class Second, class... Rest>
-auto& tagged_tuple_t<TagMap>::get() {
-    return get<First>().template get<Second, Rest...>();
+template <class First, class Second, class... Rest, class TagMap>
+auto& get(tagged_tuple_t<TagMap>& tuple) {
+    static_assert(is_tagged_tuple<typename TagMap::template type_of<First>>,
+                  "Field tag passed to recursive get is not a tagged tuple");
+    return get<Second, Rest...>(get<First>(tuple));
 }
 
 // recursive version of getter (for tagged tuple parameters)
-template <class TagMap>
-template <class First, class Second, class... Rest>
-const auto& tagged_tuple_t<TagMap>::get() const {
-    return get<First>().template get<Second, Rest...>();
+template <class First, class Second, class... Rest, class TagMap>
+const auto& get(const tagged_tuple_t<TagMap>& tuple) {
+    static_assert(is_tagged_tuple<typename TagMap::template type_of<First>>,
+                  "Field tag passed to recursive get is not a tagged tuple");
+    return get<Second, Rest...>(get<First>(tuple));
 }
 
 //==================================================================================================
@@ -234,9 +240,3 @@ template <class... Fields>
 auto make_tagged_tuple(Fields&&... fields) {
     return helper::make_tagged_tuple_helper(std::move(fields)...);
 }
-
-//==================================================================================================
-// is_tagged_tuple type trait
-
-template <class T>
-constexpr bool is_tagged_tuple = std::is_base_of<TaggedTupleTag, T>::value;

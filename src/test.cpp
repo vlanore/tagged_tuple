@@ -88,12 +88,12 @@ TEST_CASE("Direct usage of tagged_tuple_t") {
 
     my_tuple_t my_tuple;
     my_tuple.data = std::make_tuple(2, "hello");
-    CHECK(my_tuple.get<alpha>() == 2);
-    CHECK(my_tuple.get<beta>() == "hello");
+    CHECK(get<alpha>(my_tuple) == 2);
+    CHECK(get<beta>(my_tuple) == "hello");
 
     const auto& my_const_tuple = my_tuple;
-    CHECK(my_const_tuple.get<alpha>() == 2);
-    CHECK(my_const_tuple.get<beta>() == "hello");
+    CHECK(get<alpha>(my_const_tuple) == 2);
+    CHECK(get<beta>(my_const_tuple) == "hello");
 }
 
 TEST_CASE("tagged_tuple typedef") {
@@ -101,45 +101,45 @@ TEST_CASE("tagged_tuple typedef") {
 
     my_tuple_t my_tuple;
     my_tuple.data = std::make_tuple(2, "hello");  // FIXME order reversed!
-    CHECK(my_tuple.get<alpha>() == 2);
-    CHECK(my_tuple.get<beta>() == "hello");
+    CHECK(get<alpha>(my_tuple) == 2);
+    CHECK(get<beta>(my_tuple) == "hello");
 }
 
 TEST_CASE("push_front tagged tuple") {
     tagged_tuple<field<alpha, int>> t1;
     t1.data = std::make_tuple(17);
     auto t2 = push_front<beta>(t1, 2.3);
-    CHECK(t2.get<alpha>() == 17);
-    CHECK(t2.get<beta>() == 2.3);
+    CHECK(get<alpha>(t2) == 17);
+    CHECK(get<beta>(t2) == 2.3);
     auto t3 = push_front<struct gamma, std::string>(t2, "hello");
-    CHECK(t3.get<alpha>() == 17);
-    CHECK(t3.get<beta>() == 2.3);
-    CHECK(t3.get<gamma>() == "hello");
+    CHECK(get<alpha>(t3) == 17);
+    CHECK(get<beta>(t3) == 2.3);
+    CHECK(get<gamma>(t3) == "hello");
 }
 
 TEST_CASE("Test with unique_ptrs") {
     tagged_tuple<field<beta, int>, field<alpha, std::unique_ptr<double>>> t1;
     t1.data = std::make_tuple(3, std::make_unique<double>(2.3));
-    CHECK(t1.get<alpha>() == 2.3);
-    CHECK(t1.get<beta>() == 3);
+    CHECK(get<alpha>(t1) == 2.3);
+    CHECK(get<beta>(t1) == 3);
 
     auto t2 = push_front<struct gamma, std::unique_ptr<std::string>>(
         t1, std::make_unique<std::string>("hello"));
-    // CHECK(t1.get<alpha>() == nullptr); // segfaults (as expected)
-    CHECK(t2.get<alpha>() == 2.3);
-    CHECK(t2.get<beta>() == 3);
-    CHECK(t2.get<gamma>() == "hello");
+    // CHECK(get<alpha>(t1) == nullptr); // segfaults (as expected)
+    CHECK(get<alpha>(t2) == 2.3);
+    CHECK(get<beta>(t2) == 3);
+    CHECK(get<gamma>(t2) == "hello");
 }
 
 TEST_CASE("make_tagged_tuple") {
     auto t1 =
         make_tagged_tuple(value_field<alpha>(3), value_field<beta>(std::make_unique<double>(3.2)));
-    CHECK(t1.get<alpha>() == 3);
-    CHECK(t1.get<beta>() == 3.2);
+    CHECK(get<alpha>(t1) == 3);
+    CHECK(get<beta>(t1) == 3.2);
 
     auto t2 = make_tagged_tuple(value_field<alpha>(7), unique_ptr_field<beta>(7.2));
-    CHECK(t2.get<alpha>() == 7);
-    CHECK(t2.get<beta>() == 7.2);
+    CHECK(get<alpha>(t2) == 7);
+    CHECK(get<beta>(t2) == 7.2);
 }
 
 TEST_CASE("make_tagged_tuple ref/nonref") {
@@ -148,9 +148,9 @@ TEST_CASE("make_tagged_tuple ref/nonref") {
                                unique_ptr_field<struct gamma>(21));
     a = 7;
     b = 9;
-    CHECK(t.get<alpha>() == 17);
-    CHECK(t.get<beta>() == 9);
-    CHECK(t.get<gamma>() == 21);
+    CHECK(get<alpha>(t) == 17);
+    CHECK(get<beta>(t) == 9);
+    CHECK(get<gamma>(t) == 21);
 }
 
 TEST_CASE("type_of") {
@@ -164,7 +164,7 @@ TEST_CASE("type_of") {
 TEST_CASE("recursive tagged tuple") {
     auto inner = make_tagged_tuple(value_field<alpha>(2));
     auto outer = make_tagged_tuple(value_field<beta>(inner));
-    CHECK((outer.get<beta, alpha>() == 2));
+    CHECK((get<beta, alpha>(outer) == 2));
 }
 
 TEST_CASE("is_tagged_tuple") {
@@ -199,8 +199,8 @@ TEST_CASE("recursive struct printing") {
     using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
     using tuple2_t = tagged_tuple<field<alpha, tuple_t>, field<beta, tuple_t>>;
     tuple2_t t;
-    t.get<alpha>().data = std::make_tuple(2, 3.9);
-    t.get<beta>().data = std::make_tuple(0, 3.2);
+    get<alpha>(t).data = std::make_tuple(2, 3.9);
+    get<beta>(t).data = std::make_tuple(0, 3.2);
     std::string debug = type_to_string(t);
     CHECK(debug ==
           "tagged_tuple { tagged_tuple { int alpha; double beta; } alpha; tagged_tuple { int "
