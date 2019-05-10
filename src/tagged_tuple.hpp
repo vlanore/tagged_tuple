@@ -74,10 +74,30 @@ struct tagged_tuple_t : TaggedTupleTag {
 };
 
 //==================================================================================================
-// is_tagged_tuple type trait
+// is_tagged_tuple type traits
 
 template <class T>
 constexpr bool is_tagged_tuple = std::is_base_of<TaggedTupleTag, T>::value;
+
+namespace helper {
+    template <class T>
+    constexpr bool select_ttuple_ptr(utils::Type<std::unique_ptr<tagged_tuple_t<T>>>) {
+        return true;
+    }
+
+    template <class T>
+    constexpr bool select_ttuple_ptr(utils::Type<tagged_tuple_t<T>>) {
+        return true;
+    }
+
+    template <class T>
+    constexpr bool select_ttuple_ptr(utils::Type<T>) {
+        return false;
+    }
+};  // namespace helper
+
+template <class T>
+constexpr bool is_tagged_tuple_or_ptr = helper::select_ttuple_ptr(utils::Type<T>());
 
 //==================================================================================================
 // get element from tag
@@ -121,7 +141,7 @@ const auto& get(const TTuple& tuple) {
 // recursive version of getter (for tagged tuple parameters)
 template <class First, class Second, class... Rest, class TagMap>
 auto& get(tagged_tuple_t<TagMap>& tuple) {
-    static_assert(is_tagged_tuple<typename TagMap::template type_of<First>>,
+    static_assert(is_tagged_tuple_or_ptr<typename TagMap::template type_of<First>>,
                   "Field tag passed to recursive get is not a tagged tuple");
     return get<Second, Rest...>(get<First>(tuple));
 }
@@ -129,7 +149,7 @@ auto& get(tagged_tuple_t<TagMap>& tuple) {
 // recursive version of getter (for tagged tuple parameters)
 template <class First, class Second, class... Rest, class TagMap>
 const auto& get(const tagged_tuple_t<TagMap>& tuple) {
-    static_assert(is_tagged_tuple<typename TagMap::template type_of<First>>,
+    static_assert(is_tagged_tuple_or_ptr<typename TagMap::template type_of<First>>,
                   "Field tag passed to recursive get is not a tagged tuple");
     return get<Second, Rest...>(get<First>(tuple));
 }
