@@ -156,7 +156,7 @@ namespace helper {
         using old_tagmap = typename TTuple::tag_map;
         using new_tagmap = typename old_tagmap::template push_front<Tag, Type>;
         // important: this moves unique pointers
-        return tagged_tuple_t<new_tagmap>(
+        return tagged_tuple_t<new_tagmap, typename TTuple::context, typename TTuple::properties>(
             ForwardToTupleConstructor(), std::forward<Type>(new_data),
             copy_or_move(utils::Type<std::tuple_element_t<Is, typename TTuple::tuple_t>>(),
                          std::get<Is>(t.data))...);
@@ -249,10 +249,19 @@ using tag = utils::Type<Tag>;
 namespace helper {
     auto make_tagged_tuple_helper() { return tagged_tuple<>(); }
 
+    template <class Tag, class... Rest>
+    auto make_tagged_tuple_helper(tag<Tag>, Rest&&...);  // so it's declared in the other overload
+
     template <class Tag, class Type, class... Rest>
     auto make_tagged_tuple_helper(TagValuePair<Tag, Type>&& f1, Rest&&... rest) {
         auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
         return push_front<Tag>(recursive_call, std::forward<Type>(f1.data));
+    }
+
+    template <class Tag, class... Rest>
+    auto make_tagged_tuple_helper(tag<Tag>, Rest&&... rest) {
+        auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
+        return add_tag<Tag>(recursive_call);
     }
 };  // namespace helper
 

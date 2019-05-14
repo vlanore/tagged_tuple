@@ -240,4 +240,10 @@ TEST_CASE("build ttupls with tags") {
     CHECK(get<beta>(t2) == 2);
     CHECK((!has_tag<decltype(t2), Tag1>::value));
     CHECK((has_tag<decltype(t2), Tag2>::value));
+
+    auto t3 = make_tagged_tuple(value_field<alpha>(3.0), tag<Tag3>(),
+                                unique_ptr_field<beta, int>(2), tag<Tag2>());
+    CHECK((!has_tag<decltype(t3), Tag1>::value));
+    CHECK((has_tag<decltype(t3), Tag2>::value));
+    CHECK((has_tag<decltype(t3), Tag3>::value));
 }
