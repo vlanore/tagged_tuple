@@ -52,22 +52,6 @@ struct tagged_tuple_t : TaggedTupleTag {
     explicit tagged_tuple_t(ForwardToTupleConstructor, TupleConstructorArgs&&... args)
         : data(std::forward<TupleConstructorArgs>(args)...) {}
 
-    // get a field of the tagged tuple by tag (returns a reference)
-    template <class Tag>
-    auto& get();
-
-    // get a field of the tagged tuple by tag (returns a constant reference)
-    template <class Tag>
-    const auto& get() const;
-
-    // recursive version of getter (for tagged tuple parameters)
-    template <class First, class Second, class... Rest>
-    auto& get();
-
-    // recursive version of getter (for tagged tuple parameters)
-    template <class First, class Second, class... Rest>
-    const auto& get() const;
-
     // type of field
     template <class Tag>
     using type_of = std::tuple_element_t<tag_map::template get_index<Tag>(), tuple_t>;
