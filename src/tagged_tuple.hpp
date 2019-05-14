@@ -27,6 +27,7 @@ license and that you accept its terms.*/
 #pragma once
 
 #include <memory>
+#include "gommette/src/context.hpp"
 #include "type_map.hpp"
 using std::string;
 
@@ -36,11 +37,12 @@ using std::string;
 struct TaggedTupleTag {};
 struct ForwardToTupleConstructor {};
 
-template <class TagMap>
 // tagged tuple class (just a tuple wrapper with added tags and static funcs)
+template <class TagMap, class Context = Context<>>
 struct tagged_tuple_t : TaggedTupleTag {
     using tuple_t = typename TagMap::value_tuple_t;
     using tag_map = TagMap;
+    using context = Context;
 
     tuple_t data;
 
@@ -250,3 +252,9 @@ template <class... Fields>
 auto make_tagged_tuple(Fields&&... fields) {
     return helper::make_tagged_tuple_helper(std::move(fields)...);
 }
+
+//==================================================================================================
+// various type aliases to introspect tuple
+
+template <class TTuple, class Tag>
+using has_tag = typename TTuple::context::template has_tag<Tag>;

@@ -209,3 +209,15 @@ TEST_CASE("recursive struct printing") {
           "tagged_tuple { tagged_tuple { int alpha; double beta; } alpha; tagged_tuple { int "
           "alpha; double beta; } beta; }");
 }
+
+struct Tag1 {};
+struct Tag2 {};
+struct Tag3 {};
+
+TEST_CASE("Context check tag presence") {
+    using namespace utils;
+    auto t = tagged_tuple_t<type_map::Map<Pair<alpha, int>>, Context<Tag1, Tag3>>();
+    CHECK(has_tag<decltype(t), Tag1>::value);
+    CHECK(!has_tag<decltype(t), Tag2>::value);
+    CHECK(has_tag<decltype(t), Tag3>::value);
+}
