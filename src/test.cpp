@@ -217,9 +217,9 @@ struct Tag3 {};
 TEST_CASE("Context check tag presence") {
     using namespace utils;
     auto t = tagged_tuple_t<type_map::Map<Pair<alpha, int>>, Context<Tag1, Tag3>>();
-    CHECK(has_tag<decltype(t), Tag1>::value);
-    CHECK(!has_tag<decltype(t), Tag2>::value);
-    CHECK(has_tag<decltype(t), Tag3>::value);
+    CHECK((has_tag<decltype(t), Tag1>::value));
+    CHECK((!has_tag<decltype(t), Tag2>::value));
+    CHECK((has_tag<decltype(t), Tag3>::value));
 }
 
 TEST_CASE("Get property") {
@@ -229,4 +229,15 @@ TEST_CASE("Get property") {
                             Map<Pair<alpha, Tag1>, Pair<beta, Tag3>>>();
     CHECK((std::is_same<get_property<decltype(t), alpha>, Tag1>::value));
     CHECK((std::is_same<get_property<decltype(t), beta>, Tag3>::value));
+}
+
+TEST_CASE("build ttupls with tags") {
+    auto t = make_tagged_tuple(value_field<alpha>(3.0), unique_ptr_field<beta, int>(2));
+    CHECK((!has_tag<decltype(t), Tag1>::value));
+    CHECK((!has_tag<decltype(t), Tag2>::value));
+
+    auto t2 = add_tag<Tag2>(t);
+    CHECK(get<beta>(t2) == 2);
+    CHECK((!has_tag<decltype(t2), Tag1>::value));
+    CHECK((has_tag<decltype(t2), Tag2>::value));
 }

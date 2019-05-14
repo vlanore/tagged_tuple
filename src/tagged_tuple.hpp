@@ -176,6 +176,15 @@ auto push_front(TTuple& t, Type&& new_data) {
 }
 
 //==================================================================================================
+// adding tags
+
+template <class Tag, class TagMap, class Context, class Properties>
+auto add_tag(tagged_tuple_t<TagMap, Context, Properties>& t) {
+    return tagged_tuple_t<TagMap, decltype(Context::template add_tag<Tag>()), Properties>(
+        ForwardToTupleConstructor(), std::move(t.data));
+}
+
+//==================================================================================================
 // tagged_tuple type creation
 
 // to be used in field list declaration
@@ -233,6 +242,9 @@ auto unique_ptr_field(Type&& data) {
     return TagValuePair<Tag, std::unique_ptr<Type>>(
         std::make_unique<Type>(std::forward<Type>(data)));
 }
+
+template <class Tag>
+using tag = utils::Type<Tag>;
 
 namespace helper {
     auto make_tagged_tuple_helper() { return tagged_tuple<>(); }
