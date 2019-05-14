@@ -185,6 +185,15 @@ auto add_tag(tagged_tuple_t<TagMap, Context, Properties>& t) {
 }
 
 //==================================================================================================
+// adding props
+
+template <class Name, class Value, class TagMap, class Context, class Properties>
+auto add_prop(tagged_tuple_t<TagMap, Context, Properties>& t) {
+    return tagged_tuple_t<TagMap, Context, typename Properties::template push_front<Name, Value>>(
+        ForwardToTupleConstructor(), std::move(t.data));
+}
+
+//==================================================================================================
 // tagged_tuple type creation
 
 // to be used in field list declaration
@@ -246,11 +255,17 @@ auto unique_ptr_field(Type&& data) {
 template <class Tag>
 using tag = utils::Type<Tag>;
 
+template <class PropName, class PropValue>
+using property = utils::Pair<PropName, PropValue>;
+
 namespace helper {
     auto make_tagged_tuple_helper() { return tagged_tuple<>(); }
 
     template <class Tag, class... Rest>
     auto make_tagged_tuple_helper(tag<Tag>, Rest&&...);  // so it's declared in the other overload
+
+    template <class Name, class Value, class... Rest>
+    auto make_tagged_tuple_helper(property<Name, Value>, Rest&&...);
 
     template <class Tag, class Type, class... Rest>
     auto make_tagged_tuple_helper(TagValuePair<Tag, Type>&& f1, Rest&&... rest) {
@@ -262,6 +277,12 @@ namespace helper {
     auto make_tagged_tuple_helper(tag<Tag>, Rest&&... rest) {
         auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
         return add_tag<Tag>(recursive_call);
+    }
+
+    template <class Name, class Value, class... Rest>
+    auto make_tagged_tuple_helper(property<Name, Value>, Rest&&... rest) {
+        auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
+        return add_prop<Name, Value>(recursive_call);
     }
 };  // namespace helper
 

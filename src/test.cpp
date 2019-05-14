@@ -231,7 +231,7 @@ TEST_CASE("Get property") {
     CHECK((std::is_same<get_property<decltype(t), beta>, Tag3>::value));
 }
 
-TEST_CASE("build ttupls with tags") {
+TEST_CASE("build ttuples with tags") {
     auto t = make_tagged_tuple(value_field<alpha>(3.0), unique_ptr_field<beta, int>(2));
     CHECK((!has_tag<decltype(t), Tag1>::value));
     CHECK((!has_tag<decltype(t), Tag2>::value));
@@ -244,6 +244,22 @@ TEST_CASE("build ttupls with tags") {
     auto t3 = make_tagged_tuple(value_field<alpha>(3.0), tag<Tag3>(),
                                 unique_ptr_field<beta, int>(2), tag<Tag2>());
     CHECK((!has_tag<decltype(t3), Tag1>::value));
+    CHECK((has_tag<decltype(t3), Tag2>::value));
+    CHECK((has_tag<decltype(t3), Tag3>::value));
+}
+
+TEST_CASE("build ttuples with props") {
+    auto t = make_tagged_tuple(value_field<alpha>(3.0), unique_ptr_field<beta, int>(2));
+
+    auto t2 = add_prop<alpha, Tag2>(t);
+    CHECK(get<beta>(t2) == 2);
+    CHECK((std::is_same<get_property<decltype(t2), alpha>, Tag2>::value));
+
+    auto t3 =
+        make_tagged_tuple(value_field<alpha>(3.0), property<beta, Tag2>(), tag<Tag3>(),
+                          unique_ptr_field<beta, int>(2), property<alpha, Tag3>(), tag<Tag2>());
+    CHECK((std::is_same<get_property<decltype(t3), beta>, Tag2>::value));
+    CHECK((std::is_same<get_property<decltype(t3), alpha>, Tag3>::value));
     CHECK((has_tag<decltype(t3), Tag2>::value));
     CHECK((has_tag<decltype(t3), Tag3>::value));
 }
