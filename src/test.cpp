@@ -221,3 +221,12 @@ TEST_CASE("Context check tag presence") {
     CHECK(!has_tag<decltype(t), Tag2>::value);
     CHECK(has_tag<decltype(t), Tag3>::value);
 }
+
+TEST_CASE("Get property") {
+    using namespace utils;
+    using namespace type_map;
+    auto t = tagged_tuple_t<Map<Pair<alpha, int>>, Context<>,
+                            Map<Pair<alpha, Tag1>, Pair<beta, Tag3>>>();
+    CHECK((std::is_same<get_property<decltype(t), alpha>, Tag1>::value));
+    CHECK((std::is_same<get_property<decltype(t), beta>, Tag3>::value));
+}

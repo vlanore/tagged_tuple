@@ -38,11 +38,12 @@ struct TaggedTupleTag {};
 struct ForwardToTupleConstructor {};
 
 // tagged tuple class (just a tuple wrapper with added tags and static funcs)
-template <class TagMap, class Context = Context<>>
+template <class TagMap, class Context = Context<>, class Properties = type_map::Map<>>
 struct tagged_tuple_t : TaggedTupleTag {
     using tuple_t = typename TagMap::value_tuple_t;
     using tag_map = TagMap;
     using context = Context;
+    using properties = Properties;
 
     tuple_t data;
 
@@ -259,3 +260,7 @@ using has_tag = typename TTuple::context::template has_tag<Tag>;
 template <class TTuple, class Tag>
 using field_type =
     std::tuple_element_t<TTuple::tag_map::template get_index<Tag>(), typename TTuple::tuple_t>;
+
+// get property
+template <class TTuple, class Tag>
+using get_property = typename TTuple::properties::template get<Tag>;
