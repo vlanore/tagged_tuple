@@ -53,10 +53,6 @@ struct tagged_tuple_t : TaggedTupleTag {
     template <class... TupleConstructorArgs>
     explicit tagged_tuple_t(ForwardToTupleConstructor, TupleConstructorArgs&&... args)
         : data(std::forward<TupleConstructorArgs>(args)...) {}
-
-    // type of field
-    template <class Tag>
-    using type_of = std::tuple_element_t<tag_map::template get_index<Tag>(), tuple_t>;
 };
 
 //==================================================================================================
@@ -258,3 +254,8 @@ auto make_tagged_tuple(Fields&&... fields) {
 
 template <class TTuple, class Tag>
 using has_tag = typename TTuple::context::template has_tag<Tag>;
+
+// type of field
+template <class TTuple, class Tag>
+using field_type =
+    std::tuple_element_t<TTuple::tag_map::template get_index<Tag>(), typename TTuple::tuple_t>;

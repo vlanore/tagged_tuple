@@ -158,8 +158,8 @@ TEST_CASE("make_tagged_tuple ref/nonref/move") {
 
 TEST_CASE("type_of") {
     using tuple_t = tagged_tuple<field<alpha, int>, field<beta, double>>;
-    using alpha_t = tuple_t::type_of<alpha>;
-    using beta_t = tuple_t::type_of<beta>;
+    using alpha_t = field_type<tuple_t, alpha>;
+    using beta_t = field_type<tuple_t, beta>;
     CHECK((std::is_same<alpha_t, int>::value));
     CHECK((std::is_same<beta_t, double>::value));
 }
