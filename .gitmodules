@@ -1,3 +1,6 @@
 [submodule "utils/gommette"]
 	path = utils/gommette
 	url = https://github.com/vlanore/gommette.git
+[submodule "utils/minimpl"]
+	path = utils/minimpl
+	url = https://github.com/vlanore/minimpl.git
