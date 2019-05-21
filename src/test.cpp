@@ -169,52 +169,51 @@ struct Tag1 {};
 struct Tag2 {};
 struct Tag3 {};
 
-// TEST_CASE("Context check tag presence") {
-//     using namespace minimpl;
-//     auto t = tagged_tuple_t<map<pair<alpha_, int>>, list<Tag1, Tag3>>();
-//     CHECK((has_tag<decltype(t), Tag1>::value));
-//     CHECK((!has_tag<decltype(t), Tag2>::value));
-//     CHECK((has_tag<decltype(t), Tag3>::value));
-// }
+TEST_CASE("Context check tag presence") {
+    using namespace minimpl;
+    auto t = tagged_tuple_t<map<pair<alpha_, int>>, list<Tag1, Tag3>>();
+    CHECK(ttuple_has_tag<decltype(t), Tag1>::value);
+    CHECK(!ttuple_has_tag<decltype(t), Tag2>::value);
+    CHECK(ttuple_has_tag<decltype(t), Tag3>::value);
+}
 
 TEST_CASE("Get property") {
     using namespace minimpl;
     auto t = tagged_tuple_t<map<pair<alpha_, int>>, list<>,
                             map<pair<alpha_, Tag1>, pair<beta_, Tag3>>>();
-    CHECK((std::is_same<get_property<decltype(t), alpha_>, Tag1>::value));
-    CHECK((std::is_same<get_property<decltype(t), beta_>, Tag3>::value));
+    CHECK(std::is_same<get_property<decltype(t), alpha_>, Tag1>::value);
+    CHECK(std::is_same<get_property<decltype(t), beta_>, Tag3>::value);
 }
 
-// TEST_CASE("build ttuples with tags") {
-//     auto t = make_tagged_tuple(value_field<alpha_>(3.0), unique_ptr_field<beta_, int>(2));
-//     CHECK((!has_tag<decltype(t), Tag1>::value));
-//     CHECK((!has_tag<decltype(t), Tag2>::value));
+TEST_CASE("build ttuples with tags") {
+    auto t = make_tagged_tuple(value_field<alpha_>(3.0), unique_ptr_field<beta_, int>(2));
+    CHECK(!ttuple_has_tag<decltype(t), Tag1>::value);
+    CHECK(!ttuple_has_tag<decltype(t), Tag2>::value);
 
-//     auto t2 = add_tag<Tag2>(t);
-//     CHECK(get<beta_>(t2) == 2);
-//     CHECK((!has_tag<decltype(t2), Tag1>::value));
-//     CHECK((has_tag<decltype(t2), Tag2>::value));
+    auto t2 = add_tag<Tag2>(t);
+    CHECK(get<beta_>(t2) == 2);
+    CHECK(!ttuple_has_tag<decltype(t2), Tag1>::value);
+    CHECK(ttuple_has_tag<decltype(t2), Tag2>::value);
 
-//     auto t3 = make_tagged_tuple(value_field<alpha_>(3.0), tag<Tag3>(),
-//                                 unique_ptr_field<beta_, int>(2), tag<Tag2>());
-//     CHECK((!has_tag<decltype(t3), Tag1>::value));
-//     CHECK((has_tag<decltype(t3), Tag2>::value));
-//     CHECK((has_tag<decltype(t3), Tag3>::value));
-// }
+    auto t3 = make_tagged_tuple(value_field<alpha_>(3.0), tag<Tag3>(),
+                                unique_ptr_field<beta_, int>(2), tag<Tag2>());
+    CHECK(!ttuple_has_tag<decltype(t3), Tag1>::value);
+    CHECK(ttuple_has_tag<decltype(t3), Tag2>::value);
+    CHECK(ttuple_has_tag<decltype(t3), Tag3>::value);
+}
 
-// TEST_CASE("build ttuples with props") {
-//     auto t = make_tagged_tuple(value_field<alpha_>(3.0), unique_ptr_field<beta_, int>(2));
+TEST_CASE("build ttuples with props") {
+    auto t = make_tagged_tuple(value_field<alpha_>(3.0), unique_ptr_field<beta_, int>(2));
 
-//     auto t2 = add_prop<alpha_, Tag2>(t);
-//     CHECK(get<beta_>(t2) == 2);
-//     CHECK((std::is_same<get_property<decltype(t2), alpha_>, Tag2>::value));
+    auto t2 = add_prop<alpha_, Tag2>(t);
+    CHECK(get<beta_>(t2) == 2);
+    CHECK(std::is_same<get_property<decltype(t2), alpha_>, Tag2>::value);
 
-//     auto t3 =
-//         make_tagged_tuple(value_field<alpha_>(3.0), property<beta_, Tag2>(), tag<Tag3>(),
-//                           unique_ptr_field<beta_, int>(2), property<alpha_, Tag3>(),
-//                           tag<Tag2>());
-//     CHECK((std::is_same<get_property<decltype(t3), beta_>, Tag2>::value));
-//     CHECK((std::is_same<get_property<decltype(t3), alpha_>, Tag3>::value));
-//     CHECK((has_tag<decltype(t3), Tag2>::value));
-//     CHECK((has_tag<decltype(t3), Tag3>::value));
-// }
+    auto t3 =
+        make_tagged_tuple(value_field<alpha_>(3.0), property<beta_, Tag2>(), tag<Tag3>(),
+                          unique_ptr_field<beta_, int>(2), property<alpha_, Tag3>(), tag<Tag2>());
+    CHECK(std::is_same<get_property<decltype(t3), beta_>, Tag2>::value);
+    CHECK(std::is_same<get_property<decltype(t3), alpha_>, Tag3>::value);
+    CHECK(ttuple_has_tag<decltype(t3), Tag2>::value);
+    CHECK(ttuple_has_tag<decltype(t3), Tag3>::value);
+}

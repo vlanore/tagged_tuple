@@ -185,18 +185,18 @@ auto push_front(TTuple& t, Type&& new_data) {
 //==================================================================================================
 // adding tags
 
-template <class Tag, class TagMap, class Context, class Properties>
-auto add_tag(tagged_tuple_t<TagMap, Context, Properties>& t) {
-    return tagged_tuple_t<TagMap, decltype(Context::template add_tag<Tag>()), Properties>(
+template <class Tag, class Fields, class Tags, class Properties>
+auto add_tag(tagged_tuple_t<Fields, Tags, Properties>& t) {
+    return tagged_tuple_t<Fields, minimpl::list_push_front_t<Tags, Tag>, Properties>(
         ForwardToTupleConstructor(), std::move(t.data));
 }
 
 //==================================================================================================
 // adding props
 
-template <class Name, class Value, class TagMap, class Context, class Properties>
-auto add_prop(tagged_tuple_t<TagMap, Context, Properties>& t) {
-    return tagged_tuple_t<TagMap, Context, typename Properties::template push_front<Name, Value>>(
+template <class Name, class Value, class Fields, class Tags, class Properties>
+auto add_prop(tagged_tuple_t<Fields, Tags, Properties>& t) {
+    return tagged_tuple_t<Fields, Tags, minimpl::map_push_front_t<Properties, Name, Value>>(
         ForwardToTupleConstructor(), std::move(t.data));
 }
 
@@ -292,7 +292,7 @@ auto make_tagged_tuple(Fields&&... fields) {
 // various type aliases to introspect tuple
 
 template <class TTuple, class Tag>
-using has_tag = typename TTuple::tags::template has_tag<Tag>;
+using ttuple_has_tag = minimpl::list_contains<typename TTuple::tags, Tag>;
 
 // type of field
 template <class TTuple, class Tag>
