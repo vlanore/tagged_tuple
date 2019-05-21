@@ -22,9 +22,9 @@ matrix:
     env:
       - COMPILER=g++-5
     script:
-      - make coverage && make test
-    after_success:
-      - bash <(curl -s https://codecov.io/bash)
+      - make debug && make test
+    # after_success:
+    #   - bash <(curl -s https://codecov.io/bash)
 
   # ~~ linux clang ~~ =========================================
   - os: linux
