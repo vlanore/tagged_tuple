@@ -131,7 +131,7 @@ const auto& get(const TTuple& tuple) {
 // recursive version of getter (for tagged tuple parameters)
 template <class First, class Second, class... Rest, class Fields>
 auto& get(tagged_tuple_t<Fields>& tuple) {
-    static_assert(is_tagged_tuple_or_ptr<typename Fields::template type_of<First>>,
+    static_assert(is_tagged_tuple_or_ptr<minimpl::map_element_t<Fields, First>>,
                   "Field tag passed to recursive get is not a tagged tuple");
     return get<Second, Rest...>(get<First>(tuple));
 }
@@ -182,24 +182,23 @@ auto push_front(TTuple& t, Type&& new_data) {
     return helper::push_front_helper<Tag>(t, std::forward<Type>(new_data), is);
 }
 
-// //==================================================================================================
-// // adding tags
+//==================================================================================================
+// adding tags
 
-// template <class Tag, class TagMap, class Context, class Properties>
-// auto add_tag(tagged_tuple_t<TagMap, Context, Properties>& t) {
-//     return tagged_tuple_t<TagMap, decltype(Context::template add_tag<Tag>()), Properties>(
-//         ForwardToTupleConstructor(), std::move(t.data));
-// }
+template <class Tag, class TagMap, class Context, class Properties>
+auto add_tag(tagged_tuple_t<TagMap, Context, Properties>& t) {
+    return tagged_tuple_t<TagMap, decltype(Context::template add_tag<Tag>()), Properties>(
+        ForwardToTupleConstructor(), std::move(t.data));
+}
 
-// //==================================================================================================
-// // adding props
+//==================================================================================================
+// adding props
 
-// template <class Name, class Value, class TagMap, class Context, class Properties>
-// auto add_prop(tagged_tuple_t<TagMap, Context, Properties>& t) {
-//     return tagged_tuple_t<TagMap, Context, typename Properties::template push_front<Name,
-//     Value>>(
-//         ForwardToTupleConstructor(), std::move(t.data));
-// }
+template <class Name, class Value, class TagMap, class Context, class Properties>
+auto add_prop(tagged_tuple_t<TagMap, Context, Properties>& t) {
+    return tagged_tuple_t<TagMap, Context, typename Properties::template push_front<Name, Value>>(
+        ForwardToTupleConstructor(), std::move(t.data));
+}
 
 //==================================================================================================
 // tagged_tuple type creation
@@ -212,94 +211,95 @@ using field = minimpl::pair<Tag, Type>;
 template <class... Fields>
 using tagged_tuple = tagged_tuple_t<minimpl::map<Fields...>>;
 
-// //==================================================================================================
-// // make tagged tuple from values
+//==================================================================================================
+// make tagged tuple from values
 
-// // to be used in make_tagged_tuple
-// template <class Tag, class Type>
-// struct TagValuePair {
-//     Type data;
-//     template <class InitType>  // might have different ref-ness than type
-//     explicit TagValuePair(InitType&& data) : data(std::forward<InitType>(data)) {}
-// };
+// to be used in make_tagged_tuple
+template <class Tag, class Type>
+struct TagValuePair {
+    Type data;
+    template <class InitType>  // might have different ref-ness than type
+    explicit TagValuePair(InitType&& data) : data(std::forward<InitType>(data)) {}
+};
 
-// // to be used in make_tagged_tuple calls
-// template <class Tag, class Type>
-// auto value_field(Type&& data) {
-//     using nonref_type = std::remove_reference_t<Type>;
-//     return TagValuePair<Tag, nonref_type>{std::forward<Type>(data)};
-// }
+// to be used in make_tagged_tuple calls
+template <class Tag, class Type>
+auto value_field(Type&& data) {
+    using nonref_type = std::remove_reference_t<Type>;
+    return TagValuePair<Tag, nonref_type>{std::forward<Type>(data)};
+}
 
-// // to be used in make_tagged_tuple calls
-// template <class Tag, class Type>
-// auto move_field(Type& data) {
-//     return TagValuePair<Tag, Type>{std::move(data)};
-// }
+// to be used in make_tagged_tuple calls
+template <class Tag, class Type>
+auto move_field(Type& data) {
+    return TagValuePair<Tag, Type>{std::move(data)};
+}
 
-// // to be used in make_tagged_tuple calls
-// template <class Tag, class Type>
-// auto ref_field(Type& data) {
-//     return TagValuePair<Tag, Type&>(data);
-// }
+// to be used in make_tagged_tuple calls
+template <class Tag, class Type>
+auto ref_field(Type& data) {
+    return TagValuePair<Tag, Type&>(data);
+}
 
-// // to be used in make_tagged_tuple calls; builds a unique pointer to Type from Type constructor
-// args template <class Tag, class Type> auto unique_ptr_field(Type&& data) {
-//     return TagValuePair<Tag, std::unique_ptr<Type>>(
-//         std::make_unique<Type>(std::forward<Type>(data)));
-// }
+// to be used in make_tagged_tuple calls; builds a unique pointer to Type from Type constructor args
+template <class Tag, class Type>
+auto unique_ptr_field(Type&& data) {
+    return TagValuePair<Tag, std::unique_ptr<Type>>(
+        std::make_unique<Type>(std::forward<Type>(data)));
+}
 
-// template <class Tag>
-// using tag = minimpl::box<Tag>;
+template <class Tag>
+using tag = minimpl::box<Tag>;
 
-// template <class PropName, class PropValue>
-// using property = utils::Pair<PropName, PropValue>;
+template <class PropName, class PropValue>
+using property = minimpl::pair<PropName, PropValue>;
 
-// namespace helper {
-//     auto make_tagged_tuple_helper() { return tagged_tuple<>(); }
+namespace helper {
+    auto make_tagged_tuple_helper() { return tagged_tuple<>(); }
 
-//     template <class Tag, class... Rest>
-//     auto make_tagged_tuple_helper(tag<Tag>, Rest&&...);  // so it's declared in the other
-//     overload
+    template <class Tag, class... Rest>
+    auto make_tagged_tuple_helper(tag<Tag>, Rest&&...);  // so it's declared in the other overload
 
-//     template <class Name, class Value, class... Rest>
-//     auto make_tagged_tuple_helper(property<Name, Value>, Rest&&...);
+    template <class Name, class Value, class... Rest>
+    auto make_tagged_tuple_helper(property<Name, Value>, Rest&&...);
 
-//     template <class Tag, class Type, class... Rest>
-//     auto make_tagged_tuple_helper(TagValuePair<Tag, Type>&& f1, Rest&&... rest) {
-//         auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
-//         return push_front<Tag>(recursive_call, std::forward<Type>(f1.data));
-//     }
+    template <class Tag, class Type, class... Rest>
+    auto make_tagged_tuple_helper(TagValuePair<Tag, Type>&& f1, Rest&&... rest) {
+        auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
+        return push_front<Tag>(recursive_call, std::forward<Type>(f1.data));
+    }
 
-//     template <class Tag, class... Rest>
-//     auto make_tagged_tuple_helper(tag<Tag>, Rest&&... rest) {
-//         auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
-//         return add_tag<Tag>(recursive_call);
-//     }
+    template <class Tag, class... Rest>
+    auto make_tagged_tuple_helper(tag<Tag>, Rest&&... rest) {
+        auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
+        return add_tag<Tag>(recursive_call);
+    }
 
-//     template <class Name, class Value, class... Rest>
-//     auto make_tagged_tuple_helper(property<Name, Value>, Rest&&... rest) {
-//         auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
-//         return add_prop<Name, Value>(recursive_call);
-//     }
-// };  // namespace helper
+    template <class Name, class Value, class... Rest>
+    auto make_tagged_tuple_helper(property<Name, Value>, Rest&&... rest) {
+        auto recursive_call = make_tagged_tuple_helper(std::forward<Rest>(rest)...);
+        return add_prop<Name, Value>(recursive_call);
+    }
+};  // namespace helper
 
-// // builds a tuple from a list of fields with values (auto-deduces field types from values)
-// template <class... Fields>
-// auto make_tagged_tuple(Fields&&... fields) {
-//     return helper::make_tagged_tuple_helper(std::move(fields)...);
-// }
+// builds a tuple from a list of fields with values (auto-deduces field types from values)
+template <class... Fields>
+auto make_tagged_tuple(Fields&&... fields) {
+    return helper::make_tagged_tuple_helper(std::move(fields)...);
+}
 
-// //==================================================================================================
-// // various type aliases to introspect tuple
+//==================================================================================================
+// various type aliases to introspect tuple
 
-// template <class TTuple, class Tag>
-// using has_tag = typename TTuple::context::template has_tag<Tag>;
+template <class TTuple, class Tag>
+using has_tag = typename TTuple::tags::template has_tag<Tag>;
 
-// // type of field
-// template <class TTuple, class Tag>
-// using field_type =
-//     tuple_element_t<TTuple::tag_map::template get_index<Tag>(), typename TTuple::tuple_t>;
+// type of field
+template <class TTuple, class Tag>
+using field_type =
+    std::tuple_element_t<minimpl::map_element_index<typename TTuple::fields, Tag>::value,
+                         typename TTuple::tuple_t>;
 
-// // get property
-// template <class TTuple, class Tag>
-// using get_property = typename TTuple::properties::template get<Tag>;
+// get property
+template <class TTuple, class Tag>
+using get_property = minimpl::map_element_t<typename TTuple::properties, Tag>;

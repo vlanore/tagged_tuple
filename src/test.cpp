@@ -67,70 +67,69 @@ TEST_CASE("push_front tagged tuple") {
     auto t2 = push_front<beta_>(t1, 2.3);
     CHECK(get<alpha_>(t2) == 17);
     CHECK(get<beta_>(t2) == 2.3);
-    auto t3 = push_front<struct gamma, std::string>(t2, "hello");
+    auto t3 = push_front<struct gamma_, std::string>(t2, "hello");
     CHECK(get<alpha_>(t3) == 17);
     CHECK(get<beta_>(t3) == 2.3);
-    CHECK(get<gamma>(t3) == "hello");
+    CHECK(get<gamma_>(t3) == "hello");
 }
 
-// TEST_CASE("Test with unique_ptrs") {
-//     tagged_tuple<field<beta_, int>, field<alpha_, std::unique_ptr<double>>> t1;
-//     t1.data = std::make_tuple(3, std::make_unique<double>(2.3));
-//     CHECK(get<alpha_>(t1) == 2.3);
-//     CHECK(get<beta_>(t1) == 3);
+TEST_CASE("Test with unique_ptrs") {
+    tagged_tuple<field<beta_, int>, field<alpha_, std::unique_ptr<double>>> t1;
+    t1.data = std::make_tuple(3, std::make_unique<double>(2.3));
+    CHECK(get<alpha_>(t1) == 2.3);
+    CHECK(get<beta_>(t1) == 3);
 
-//     auto t2 = push_front<struct gamma, std::unique_ptr<std::string>>(
-//         t1, std::make_unique<std::string>("hello"));
-//     // CHECK(get<alpha_>(t1) == nullptr); // segfaults (as expected)
-//     CHECK(get<alpha_>(t2) == 2.3);
-//     CHECK(get<beta_>(t2) == 3);
-//     CHECK(get<gamma>(t2) == "hello");
-// }
+    auto t2 = push_front<struct gamma_, std::unique_ptr<std::string>>(
+        t1, std::make_unique<std::string>("hello"));
+    // CHECK(get<alpha_>(t1) == nullptr); // segfaults (as expected)
+    CHECK(get<alpha_>(t2) == 2.3);
+    CHECK(get<beta_>(t2) == 3);
+    CHECK(get<gamma_>(t2) == "hello");
+}
 
-// TEST_CASE("make_tagged_tuple") {
-//     auto t1 =
-//         make_tagged_tuple(value_field<alpha_>(3),
-//         value_field<beta_>(std::make_unique<double>(3.2)));
-//     CHECK(get<alpha_>(t1) == 3);
-//     CHECK(get<beta_>(t1) == 3.2);
+TEST_CASE("make_tagged_tuple") {
+    auto t1 = make_tagged_tuple(value_field<alpha_>(3),
+                                value_field<beta_>(std::make_unique<double>(3.2)));
+    CHECK(get<alpha_>(t1) == 3);
+    CHECK(get<beta_>(t1) == 3.2);
 
-//     auto t2 = make_tagged_tuple(value_field<alpha_>(7), unique_ptr_field<beta_>(7.2));
-//     CHECK(get<alpha_>(t2) == 7);
-//     CHECK(get<beta_>(t2) == 7.2);
-// }
+    auto t2 = make_tagged_tuple(value_field<alpha_>(7), unique_ptr_field<beta_>(7.2));
+    CHECK(get<alpha_>(t2) == 7);
+    CHECK(get<beta_>(t2) == 7.2);
+}
 
-// TEST_CASE("make_tagged_tuple ref/nonref/move") {
-//     auto c = std::make_unique<double>(3);
-//     int a{17}, b{19};
-//     auto t = make_tagged_tuple(value_field<alpha_>(a), ref_field<beta_>(b),
-//                                unique_ptr_field<struct gamma>(21), move_field<delta>(c));
-//     a = 7;
-//     b = 9;
-//     CHECK(get<alpha_>(t) == 17);
-//     CHECK(get<beta_>(t) == 9);
-//     CHECK(get<gamma>(t) == 21);
-//     CHECK(get<delta>(t) == 3);
-// }
+TEST_CASE("make_tagged_tuple ref/nonref/move") {
+    auto c = std::make_unique<double>(3);
+    int a{17}, b{19};
+    auto t = make_tagged_tuple(value_field<alpha_>(a), ref_field<beta_>(b),
+                               unique_ptr_field<struct gamma_>(21), move_field<delta_>(c));
+    a = 7;
+    b = 9;
+    CHECK(get<alpha_>(t) == 17);
+    CHECK(get<beta_>(t) == 9);
+    CHECK(get<gamma_>(t) == 21);
+    CHECK(get<delta_>(t) == 3);
+}
 
-// TEST_CASE("type_of") {
-//     using tuple_t = tagged_tuple<field<alpha_, int>, field<beta_, double>>;
-//     using alpha_t = field_type<tuple_t, alpha_>;
-//     using beta_t = field_type<tuple_t, beta_>;
-//     CHECK((std::is_same<alpha_t, int>::value));
-//     CHECK((std::is_same<beta_t, double>::value));
-// }
+TEST_CASE("type_of") {
+    using tuple_t = tagged_tuple<field<alpha_, int>, field<beta_, double>>;
+    using alpha_t = field_type<tuple_t, alpha_>;
+    using beta_t = field_type<tuple_t, beta_>;
+    CHECK((std::is_same<alpha_t, int>::value));
+    CHECK((std::is_same<beta_t, double>::value));
+}
 
-// TEST_CASE("recursive tagged tuple") {
-//     auto inner = make_tagged_tuple(value_field<alpha_>(2));
-//     auto outer = make_tagged_tuple(value_field<beta_>(inner));
-//     CHECK((get<beta_, alpha_>(outer) == 2));
-// }
+TEST_CASE("recursive tagged tuple") {
+    auto inner = make_tagged_tuple(value_field<alpha_>(2));
+    auto outer = make_tagged_tuple(value_field<beta_>(inner));
+    CHECK((get<beta_, alpha_>(outer) == 2));
+}
 
-// TEST_CASE("is_tagged_tuple") {
-//     using tuple_t = tagged_tuple<field<alpha_, int>, field<beta_, double>>;
-//     CHECK(is_tagged_tuple<tuple_t>);
-//     CHECK(!is_tagged_tuple<double>);
-// }
+TEST_CASE("is_tagged_tuple") {
+    using tuple_t = tagged_tuple<field<alpha_, int>, field<beta_, double>>;
+    CHECK(is_tagged_tuple<tuple_t>::value);
+    CHECK(!is_tagged_tuple<double>::value);
+}
 
 // TEST_CASE("basic type printing") { CHECK(type_to_string<alpha_>() == "alpha_"); }
 
@@ -166,26 +165,25 @@ TEST_CASE("push_front tagged tuple") {
 //           "alpha_; double beta_; } beta_; }");
 // }
 
-// struct Tag1 {};
-// struct Tag2 {};
-// struct Tag3 {};
+struct Tag1 {};
+struct Tag2 {};
+struct Tag3 {};
 
 // TEST_CASE("Context check tag presence") {
-//     using namespace utils;
-//     auto t = tagged_tuple_t<type_map::Map<Pair<alpha_, int>>, Context<Tag1, Tag3>>();
+//     using namespace minimpl;
+//     auto t = tagged_tuple_t<map<pair<alpha_, int>>, list<Tag1, Tag3>>();
 //     CHECK((has_tag<decltype(t), Tag1>::value));
 //     CHECK((!has_tag<decltype(t), Tag2>::value));
 //     CHECK((has_tag<decltype(t), Tag3>::value));
 // }
 
-// TEST_CASE("Get property") {
-//     using namespace utils;
-//     using namespace type_map;
-//     auto t = tagged_tuple_t<Map<Pair<alpha_, int>>, Context<>,
-//                             Map<Pair<alpha_, Tag1>, Pair<beta_, Tag3>>>();
-//     CHECK((std::is_same<get_property<decltype(t), alpha_>, Tag1>::value));
-//     CHECK((std::is_same<get_property<decltype(t), beta_>, Tag3>::value));
-// }
+TEST_CASE("Get property") {
+    using namespace minimpl;
+    auto t = tagged_tuple_t<map<pair<alpha_, int>>, list<>,
+                            map<pair<alpha_, Tag1>, pair<beta_, Tag3>>>();
+    CHECK((std::is_same<get_property<decltype(t), alpha_>, Tag1>::value));
+    CHECK((std::is_same<get_property<decltype(t), beta_>, Tag3>::value));
+}
 
 // TEST_CASE("build ttuples with tags") {
 //     auto t = make_tagged_tuple(value_field<alpha_>(3.0), unique_ptr_field<beta_, int>(2));
