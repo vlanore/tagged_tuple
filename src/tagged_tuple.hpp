@@ -55,8 +55,6 @@ struct tagged_tuple_t : TaggedTuple {
     tuple_t data;
 
     tagged_tuple_t() = default;
-    tagged_tuple_t(const tagged_tuple_t&) = default;
-    tagged_tuple_t(tagged_tuple_t&&) = default;
 
     template <class... TupleConstructorArgs>
     explicit tagged_tuple_t(ForwardToTupleConstructor, TupleConstructorArgs&&... args)
