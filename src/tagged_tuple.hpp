@@ -70,13 +70,13 @@ template <class T>
 using is_tagged_tuple = std::is_base_of<TaggedTuple, T>;
 
 namespace helper {
-    template <class T>
-    constexpr bool select_ttuple_ptr(box<std::unique_ptr<tagged_tuple_t<T>>>) {
+    template <class... T>
+    constexpr bool select_ttuple_ptr(box<std::unique_ptr<tagged_tuple_t<T...>>>) {
         return true;
     }
 
-    template <class T>
-    constexpr bool select_ttuple_ptr(box<tagged_tuple_t<T>>) {
+    template <class... T>
+    constexpr bool select_ttuple_ptr(box<tagged_tuple_t<T...>>) {
         return true;
     }
 
@@ -129,16 +129,16 @@ const auto& get(const TTuple& tuple) {
 }
 
 // recursive version of getter (for tagged tuple parameters)
-template <class First, class Second, class... Rest, class Fields>
-auto& get(tagged_tuple_t<Fields>& tuple) {
+template <class First, class Second, class... Rest, class Fields, class Tags, class Properties>
+auto& get(tagged_tuple_t<Fields, Tags, Properties>& tuple) {
     static_assert(is_tagged_tuple_or_ptr<minimpl::map_element_t<Fields, First>>,
                   "Field tag passed to recursive get is not a tagged tuple");
     return get<Second, Rest...>(get<First>(tuple));
 }
 
 // recursive version of getter (for tagged tuple parameters)
-template <class First, class Second, class... Rest, class Fields>
-const auto& get(const tagged_tuple_t<Fields>& tuple) {
+template <class First, class Second, class... Rest, class Fields, class Tags, class Properties>
+const auto& get(const tagged_tuple_t<Fields, Tags, Properties>& tuple) {
     static_assert(is_tagged_tuple_or_ptr<minimpl::map_element_t<Fields, First>>,
                   "Field tag passed to recursive get is not a tagged tuple");
     return get<Second, Rest...>(get<First>(tuple));
