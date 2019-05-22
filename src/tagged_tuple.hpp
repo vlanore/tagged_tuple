@@ -139,7 +139,7 @@ auto& get(tagged_tuple_t<Fields>& tuple) {
 // recursive version of getter (for tagged tuple parameters)
 template <class First, class Second, class... Rest, class Fields>
 const auto& get(const tagged_tuple_t<Fields>& tuple) {
-    static_assert(is_tagged_tuple_or_ptr<typename Fields::template type_of<First>>,
+    static_assert(is_tagged_tuple_or_ptr<minimpl::map_element_t<Fields, First>>,
                   "Field tag passed to recursive get is not a tagged tuple");
     return get<Second, Rest...>(get<First>(tuple));
 }
