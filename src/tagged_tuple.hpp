@@ -47,7 +47,7 @@ struct tagged_tuple_t : TaggedTuple {
     static_assert(minimpl::is_list<Tags>::value, "Tags should be a list");
     static_assert(minimpl::is_map<Properties>::value, "Properties should be a map");
 
-    using tuple_t = minimpl::map_value_tuple_t<Fields>;
+    using tuple_t = typename minimpl::map_value_list_t<Fields>::tuple;
     using fields = Fields;
     using tags = Tags;
     using properties = Properties;
