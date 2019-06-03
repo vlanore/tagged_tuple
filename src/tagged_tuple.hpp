@@ -31,13 +31,26 @@ license and that you accept its terms.*/
 template <class T, class U>
 using field = type_pair<T, U>;
 
+struct no_metadata {};
+struct tuple_construct {};
+
 template <class Metadata, class... Fields>
 struct tagged_tuple {
     using field_map = type_map<Fields...>;
     using metadata = Metadata;
-
     map_value_list_t<field_map> data;
+
+    tagged_tuple() = default;
+
+    template <class... Args>
+    tagged_tuple(tuple_construct, Args&&... args) : data(std::forward<Args>(args)...) {}
 };
+
+//==================================================================================================
+template <class Key, class MD, class... Fields>
+map_element_t<Key, type_map<Fields...>>& get(tagged_tuple<MD, Fields...>& t) {
+    return get<map_element_index<Key, type_map<Fields...>>::value>(t.data);
+}
 
 // namespace helper {
 //     using namespace minimpl;

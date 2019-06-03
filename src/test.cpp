@@ -38,15 +38,19 @@ struct gamma_ {};
 struct delta_ {};
 
 TEST_CASE("Direct usage of tagged_tuple_t") {
-    using my_tuple =
-        tagged_tuple<void, field<alpha_, int>, field<beta_, double>, field<gamma_, char>>;
+    using my_tuple_t = tagged_tuple<no_metadata, field<alpha_, int>, field<beta_, double>,
+                                    field<gamma_, std::string>>;
+    struct my_struct {
+        int a;
+        double b;
+        std::string c;
+    };
 
-    // using my_map = map<pair<alpha_, int>, pair<beta_, string>>;
-    // using my_tuple_t = tagged_tuple_t<my_map>;
+    CHECK(sizeof(my_tuple_t) == sizeof(my_struct));
 
-    // my_tuple_t my_tuple;
-    // my_tuple.data = std::make_tuple(2, "hello");
-    // CHECK(get<alpha_>(my_tuple) == 2);
+    my_tuple_t my_tuple;
+    my_tuple.data = std::make_tuple(2, 3.0, "hello");
+    CHECK(get<alpha_>(my_tuple) == 2);
     // CHECK(get<beta_>(my_tuple) == "hello");
 
     // const auto& my_const_tuple = my_tuple;
