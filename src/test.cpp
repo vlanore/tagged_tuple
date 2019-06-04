@@ -64,14 +64,19 @@ TEST_CASE("Constructors and get (basic usage)") {
     CHECK(get<gamma_>(my_tuple2) == "hi");
 }
 
-// TEST_CASE("tagged_tuple typedef") {
-//     using my_tuple_t = tagged_tuple<field<alpha_, int>, field<beta_, string>>;
+TEST_CASE("Test with unique_ptrs") {
+    tagged_tuple<no_metadata, field<beta_, int>, field<alpha_, std::unique_ptr<double>>> t1;
+    t1.data = std::make_tuple(3, std::make_unique<double>(2.3));
+    CHECK(get<alpha_>(t1) == 2.3);
+    CHECK(get<beta_>(t1) == 3);
 
-//     my_tuple_t my_tuple;
-//     my_tuple.data = std::make_tuple(2, "hello");  // FIXME order reversed!
-//     CHECK(get<alpha_>(my_tuple) == 2);
-//     CHECK(get<beta_>(my_tuple) == "hello");
-// }
+    // auto t2 = push_front<struct gamma_, std::unique_ptr<std::string>>(
+    //     t1, std::make_unique<std::string>("hello"));
+    // // CHECK(get<alpha_>(t1) == nullptr); // segfaults (as expected)
+    // CHECK(get<alpha_>(t2) == 2.3);
+    // CHECK(get<beta_>(t2) == 3);
+    // CHECK(get<gamma_>(t2) == "hello");
+}
 
 // TEST_CASE("push_front tagged tuple") {
 //     tagged_tuple<field<alpha_, int>> t1;
@@ -83,20 +88,6 @@ TEST_CASE("Constructors and get (basic usage)") {
 //     CHECK(get<alpha_>(t3) == 17);
 //     CHECK(get<beta_>(t3) == 2.3);
 //     CHECK(get<gamma_>(t3) == "hello");
-// }
-
-// TEST_CASE("Test with unique_ptrs") {
-//     tagged_tuple<field<beta_, int>, field<alpha_, std::unique_ptr<double>>> t1;
-//     t1.data = std::make_tuple(3, std::make_unique<double>(2.3));
-//     CHECK(get<alpha_>(t1) == 2.3);
-//     CHECK(get<beta_>(t1) == 3);
-
-//     auto t2 = push_front<struct gamma_, std::unique_ptr<std::string>>(
-//         t1, std::make_unique<std::string>("hello"));
-//     // CHECK(get<alpha_>(t1) == nullptr); // segfaults (as expected)
-//     CHECK(get<alpha_>(t2) == 2.3);
-//     CHECK(get<beta_>(t2) == 3);
-//     CHECK(get<gamma_>(t2) == "hello");
 // }
 
 // TEST_CASE("make_tagged_tuple") {

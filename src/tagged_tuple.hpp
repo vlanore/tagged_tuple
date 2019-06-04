@@ -26,8 +26,8 @@ license and that you accept its terms.*/
 
 #pragma once
 
-#include <memory>
 #include "minimpl/src/type_map.hpp"
+#include "ptr_utils.hpp"
 
 template <class T, class U>
 using field = type_pair<T, U>;
@@ -49,27 +49,29 @@ struct tagged_tuple {
 
 //==================================================================================================
 template <class T>
+using field_map_t = typename T::field_map;
+
+template <class T>
+using metadata_t = typename T::metadata;
+
+//==================================================================================================
+template <class T>
 struct is_tagged_tuple : std::false_type {};
 
 template <class MD, class... Fields>
 struct is_tagged_tuple<tagged_tuple<MD, Fields...>> : std::true_type {};
 
 //==================================================================================================
-template <class T>
-struct is_unique_ptr : std::false_type {};
-
-template <class T>
-struct is_unique_ptr<std::unique_ptr<T>> : std::true_type {};
-
-//==================================================================================================
 template <class Key, class MD, class... Fields>
-map_element_t<Key, type_map<Fields...>>& get(tagged_tuple<MD, Fields...>& t) {
-    return get<map_element_index<Key, type_map<Fields...>>::value>(t.data);
+auto& get(tagged_tuple<MD, Fields...>& t) {
+    constexpr size_t index = map_element_index<Key, type_map<Fields...>>::value;
+    return deref_if_ptr(get<index>(t.data));
 }
 
 template <class Key, class MD, class... Fields>
-const map_element_t<Key, type_map<Fields...>>& get(const tagged_tuple<MD, Fields...>& t) {
-    return get<map_element_index<Key, type_map<Fields...>>::value>(t.data);
+const auto& get(const tagged_tuple<MD, Fields...>& t) {
+    constexpr size_t index = map_element_index<Key, type_map<Fields...>>::value;
+    return deref_if_ptr(get<index>(t.data));
 }
 
 // namespace helper {
