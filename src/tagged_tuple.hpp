@@ -74,6 +74,19 @@ const auto& get(const tagged_tuple<MD, Fields...>& t) {
     return deref_if_ptr(get<index>(t.data));
 }
 
+//==================================================================================================
+template <class Name, class Type, class MD, class... Fields, size_t... Is>
+auto push_front_helper(Type&& v, tagged_tuple<MD, Fields...>& t, std::index_sequence<Is...>) {
+    using result_t = tagged_tuple<MD, field<Name, std::remove_reference_t<Type>>, Fields...>;
+    return result_t(tuple_construct(), std::move(v), std::move(get<Is>(t.data))...);
+}
+
+template <class Name, class Type, class MD, class... Fields>
+auto push_front(Type&& v, tagged_tuple<MD, Fields...>& t) {
+    return push_front_helper<Name>(std::forward<Type>(v), t,
+                                   std::make_index_sequence<sizeof...(Fields)>());
+}
+
 // namespace helper {
 //     using namespace minimpl;
 // };

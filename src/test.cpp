@@ -64,31 +64,31 @@ TEST_CASE("Constructors and get (basic usage)") {
     CHECK(get<gamma_>(my_tuple2) == "hi");
 }
 
+TEST_CASE("push_front tagged tuple") {
+    tagged_tuple<no_metadata, field<alpha_, int>> t1;
+    t1.data = std::make_tuple(17);
+    auto t2 = push_front<beta_>(2.3, t1);
+    CHECK(get<alpha_>(t2) == 17);
+    CHECK(get<beta_>(t2) == 2.3);
+    auto t3 = push_front<gamma_, std::string>("hello", t2);
+    CHECK(get<alpha_>(t3) == 17);
+    CHECK(get<beta_>(t3) == 2.3);
+    CHECK(get<gamma_>(t3) == "hello");
+}
+
 TEST_CASE("Test with unique_ptrs") {
     tagged_tuple<no_metadata, field<beta_, int>, field<alpha_, std::unique_ptr<double>>> t1;
     t1.data = std::make_tuple(3, std::make_unique<double>(2.3));
     CHECK(get<alpha_>(t1) == 2.3);
     CHECK(get<beta_>(t1) == 3);
 
-    // auto t2 = push_front<struct gamma_, std::unique_ptr<std::string>>(
-    //     t1, std::make_unique<std::string>("hello"));
-    // // CHECK(get<alpha_>(t1) == nullptr); // segfaults (as expected)
-    // CHECK(get<alpha_>(t2) == 2.3);
-    // CHECK(get<beta_>(t2) == 3);
-    // CHECK(get<gamma_>(t2) == "hello");
+    auto t2 = push_front<gamma_, std::unique_ptr<std::string>>(
+        std::make_unique<std::string>("hello"), t1);
+    // CHECK(get<alpha_>(t1) == nullptr); // segfaults (as expected)
+    CHECK(get<alpha_>(t2) == 2.3);
+    CHECK(get<beta_>(t2) == 3);
+    CHECK(get<gamma_>(t2) == "hello");
 }
-
-// TEST_CASE("push_front tagged tuple") {
-//     tagged_tuple<field<alpha_, int>> t1;
-//     t1.data = std::make_tuple(17);
-//     auto t2 = push_front<beta_>(t1, 2.3);
-//     CHECK(get<alpha_>(t2) == 17);
-//     CHECK(get<beta_>(t2) == 2.3);
-//     auto t3 = push_front<struct gamma_, std::string>(t2, "hello");
-//     CHECK(get<alpha_>(t3) == 17);
-//     CHECK(get<beta_>(t3) == 2.3);
-//     CHECK(get<gamma_>(t3) == "hello");
-// }
 
 // TEST_CASE("make_tagged_tuple") {
 //     auto t1 = make_tagged_tuple(value_field<alpha_>(3),
