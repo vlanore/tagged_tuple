@@ -26,13 +26,13 @@ license and that you accept its terms.*/
 
 #pragma once
 
+#include "metadata.hpp"
 #include "minimpl/src/type_map.hpp"
 #include "ptr_utils.hpp"
 
 template <class T, class U>
 using field = type_pair<T, U>;
 
-struct no_metadata {};
 struct tuple_construct {};
 
 template <class Metadata, class... Fields>
@@ -50,9 +50,6 @@ struct tagged_tuple {
 //==================================================================================================
 template <class T>
 using field_map_t = typename T::field_map;
-
-template <class T>
-using metadata_t = typename T::metadata;
 
 //==================================================================================================
 template <class T>
@@ -156,13 +153,6 @@ auto make_tagged_tuple(TVPairs&&... pairs) {
 // //==================================================================================================
 // // various type aliases to introspect tuple
 
-// template <class TTuple, class Tag>
-// using ttuple_has_tag = minimpl::list_contains<typename TTuple::tags, Tag>;
-
 // type of field
 template <class Tag, class TTuple>
 using field_type = map_element_t<Tag, field_map_t<TTuple>>;
-
-// // get property
-// template <class TTuple, class Tag>
-// using get_property = minimpl::map_element_t<typename TTuple::properties, Tag>;

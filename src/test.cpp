@@ -128,92 +128,60 @@ TEST_CASE("recursive tagged tuple") {
     CHECK((get<beta_, alpha_>(outer) == 2));
 }
 
-// // TEST_CASE("basic type printing") { CHECK(type_to_string<alpha_>() == "alpha_"); }
+TEST_CASE("Metadata") {
+    using m = metadata<type_list<alpha_, beta_>,
+                       type_map<property<alpha_, double>, property<gamma_, char>>>;
+    using m2 = metadata<alpha_, type_list<beta_, gamma_>>;
+    CHECK(is_metadata<m>::value);
+    CHECK(not is_metadata<m2>::value);
+    CHECK(has_tag<alpha_, m>::value);
+    CHECK(has_tag<beta_, m>::value);
+    CHECK(not has_tag<gamma_, m>::value);
+    CHECK(has_property<alpha_, m>::value);
+    CHECK(not has_property<beta_, m>::value);
+    CHECK(has_property<gamma_, m>::value);
+    CHECK(std::is_same<get_property<alpha_, m>, double>::value);
+    CHECK(std::is_same<get_property<gamma_, m>, char>::value);
+}
 
-// // TEST_CASE("struct printing") {
-// //     using tuple_t = tagged_tuple<field<alpha_, int>, field<beta_, double>>;
-// //     tuple_t t;
-// //     t.data = std::make_tuple(1, 3.2);
-// //     std::string debug = type_to_string(t);
-// //     CHECK(debug == "tagged_tuple { int alpha_; double beta_; }");
-// // }
+TEST_CASE("Tuple metadata access") {
+    using m = metadata<type_list<alpha_, beta_>,
+                       type_map<property<alpha_, double>, property<gamma_, char>>>;
+    auto t = make_tagged_tuple<m>(value_field<alpha_>(2), value_field<beta_>(3.2));
+}
 
-// // TEST_CASE("Struct printing with non-default constructible stuff") {
-// //     double a = 3.2;
-// //     auto inner = make_tagged_tuple(ref_field<alpha_>(a));
-// //     auto outer = make_tagged_tuple(value_field<beta_>(inner));
-// //     CHECK(type_to_string(outer) == "tagged_tuple { tagged_tuple { double& alpha_; } beta_;
+// TEST_CASE("basic type printing") { CHECK(type_to_string<alpha_>() == "alpha_"); }
+
+// TEST_CASE("struct printing") {
+//     using tuple_t = tagged_tuple<field<alpha_, int>, field<beta_, double>>;
+//     tuple_t t;
+//     t.data = std::make_tuple(1, 3.2);
+//     std::string debug = type_to_string(t);
+//     CHECK(debug == "tagged_tuple { int alpha_; double beta_; }");
+// }
+
+// TEST_CASE("Struct printing with non-default constructible stuff") {
+//     double a = 3.2;
+//     auto inner = make_tagged_tuple(ref_field<alpha_>(a));
+//     auto outer = make_tagged_tuple(value_field<beta_>(inner));
+//     CHECK(type_to_string(outer) == "tagged_tuple { tagged_tuple { double& alpha_; } beta_;
 // }");
-// // }
+// }
 
-// // TEST_CASE("Struct printing with unique_pointers") {
-// //     auto t = make_tagged_tuple(unique_ptr_field<alpha_>(3.2));
-// //     CHECK(type_to_string(t) == "tagged_tuple { unique_ptr<double> alpha_; }");
-// // }
+// TEST_CASE("Struct printing with unique_pointers") {
+//     auto t = make_tagged_tuple(unique_ptr_field<alpha_>(3.2));
+//     CHECK(type_to_string(t) == "tagged_tuple { unique_ptr<double> alpha_; }");
+// }
 
-// // TEST_CASE("recursive struct printing") {
-// //     using tuple_t = tagged_tuple<field<alpha_, int>, field<beta_, double>>;
-// //     using tuple2_t = tagged_tuple<field<alpha_, tuple_t>, field<beta_, tuple_t>>;
-// //     tuple2_t t;
-// //     get<alpha_>(t).data = std::make_tuple(2, 3.9);
-// //     get<beta_>(t).data = std::make_tuple(0, 3.2);
-// //     std::string debug = type_to_string(t);
-// //     CHECK(debug ==
-// //           "tagged_tuple { tagged_tuple { int alpha_; double beta_; } alpha_; tagged_tuple {
+// TEST_CASE("recursive struct printing") {
+//     using tuple_t = tagged_tuple<field<alpha_, int>, field<beta_, double>>;
+//     using tuple2_t = tagged_tuple<field<alpha_, tuple_t>, field<beta_, tuple_t>>;
+//     tuple2_t t;
+//     get<alpha_>(t).data = std::make_tuple(2, 3.9);
+//     get<beta_>(t).data = std::make_tuple(0, 3.2);
+//     std::string debug = type_to_string(t);
+//     CHECK(debug ==
+//           "tagged_tuple { tagged_tuple { int alpha_; double beta_; } alpha_; tagged_tuple {
 // int "
-// //           "alpha_; double beta_; } beta_; }");
-// // }
-
-// struct Tag1 {};
-// struct Tag2 {};
-// struct Tag3 {};
-
-// TEST_CASE("Context check tag presence") {
-//     using namespace minimpl;
-//     auto t = tagged_tuple_t<map<pair<alpha_, int>>, list<Tag1, Tag3>>();
-//     CHECK(ttuple_has_tag<decltype(t), Tag1>::value);
-//     CHECK(!ttuple_has_tag<decltype(t), Tag2>::value);
-//     CHECK(ttuple_has_tag<decltype(t), Tag3>::value);
-// }
-
-// TEST_CASE("Get property") {
-//     using namespace minimpl;
-//     auto t = tagged_tuple_t<map<pair<alpha_, int>>, list<>,
-//                             map<pair<alpha_, Tag1>, pair<beta_, Tag3>>>();
-//     CHECK(std::is_same<get_property<decltype(t), alpha_>, Tag1>::value);
-//     CHECK(std::is_same<get_property<decltype(t), beta_>, Tag3>::value);
-// }
-
-// TEST_CASE("build ttuples with tags") {
-//     auto t = make_tagged_tuple(value_field<alpha_>(3.0), unique_ptr_field<beta_, int>(2));
-//     CHECK(!ttuple_has_tag<decltype(t), Tag1>::value);
-//     CHECK(!ttuple_has_tag<decltype(t), Tag2>::value);
-
-//     auto t2 = add_tag<Tag2>(t);
-//     CHECK(get<beta_>(t2) == 2);
-//     CHECK(!ttuple_has_tag<decltype(t2), Tag1>::value);
-//     CHECK(ttuple_has_tag<decltype(t2), Tag2>::value);
-
-//     auto t3 = make_tagged_tuple(value_field<alpha_>(3.0), tag<Tag3>(),
-//                                 unique_ptr_field<beta_, int>(2), tag<Tag2>());
-//     CHECK(!ttuple_has_tag<decltype(t3), Tag1>::value);
-//     CHECK(ttuple_has_tag<decltype(t3), Tag2>::value);
-//     CHECK(ttuple_has_tag<decltype(t3), Tag3>::value);
-// }
-
-// TEST_CASE("build ttuples with props") {
-//     auto t = make_tagged_tuple(value_field<alpha_>(3.0), unique_ptr_field<beta_, int>(2));
-
-//     auto t2 = add_prop<alpha_, Tag2>(t);
-//     CHECK(get<beta_>(t2) == 2);
-//     CHECK(std::is_same<get_property<decltype(t2), alpha_>, Tag2>::value);
-
-//     auto t3 =
-//         make_tagged_tuple(value_field<alpha_>(3.0), property<beta_, Tag2>(), tag<Tag3>(),
-//                           unique_ptr_field<beta_, int>(2), property<alpha_, Tag3>(),
-//                           tag<Tag2>());
-//     CHECK(std::is_same<get_property<decltype(t3), beta_>, Tag2>::value);
-//     CHECK(std::is_same<get_property<decltype(t3), alpha_>, Tag3>::value);
-//     CHECK(ttuple_has_tag<decltype(t3), Tag2>::value);
-//     CHECK(ttuple_has_tag<decltype(t3), Tag3>::value);
+//           "alpha_; double beta_; } beta_; }");
 // }
