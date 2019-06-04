@@ -53,10 +53,10 @@ struct is_metadata<metadata<Tags, Properties>>
     : std::integral_constant<bool, is_list<Tags>::value and is_map<Properties>::value> {};
 
 template <class Tag, class MD>
-using has_tag = list_contains<Tag, tags_t<MD>>;
+using metadata_has_tag = list_contains<Tag, tags_t<MD>>;
 
 template <class Name, class MD>
-using has_property = list_contains<Name, map_key_list_t<properties_t<MD>>>;
+using metadata_has_property = list_contains<Name, map_key_list_t<properties_t<MD>>>;
 
 template <class Name, class MD>
-using get_property = map_element_t<Name, properties_t<MD>>;
+using metadata_get_property = map_element_t<Name, properties_t<MD>>;

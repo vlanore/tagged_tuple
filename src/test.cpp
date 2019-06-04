@@ -134,20 +134,23 @@ TEST_CASE("Metadata") {
     using m2 = metadata<alpha_, type_list<beta_, gamma_>>;
     CHECK(is_metadata<m>::value);
     CHECK(not is_metadata<m2>::value);
-    CHECK(has_tag<alpha_, m>::value);
-    CHECK(has_tag<beta_, m>::value);
-    CHECK(not has_tag<gamma_, m>::value);
-    CHECK(has_property<alpha_, m>::value);
-    CHECK(not has_property<beta_, m>::value);
-    CHECK(has_property<gamma_, m>::value);
-    CHECK(std::is_same<get_property<alpha_, m>, double>::value);
-    CHECK(std::is_same<get_property<gamma_, m>, char>::value);
+    CHECK(metadata_has_tag<alpha_, m>::value);
+    CHECK(metadata_has_tag<beta_, m>::value);
+    CHECK(not metadata_has_tag<gamma_, m>::value);
+    CHECK(metadata_has_property<alpha_, m>::value);
+    CHECK(not metadata_has_property<beta_, m>::value);
+    CHECK(metadata_has_property<gamma_, m>::value);
+    CHECK(std::is_same<metadata_get_property<alpha_, m>, double>::value);
+    CHECK(std::is_same<metadata_get_property<gamma_, m>, char>::value);
 }
 
 TEST_CASE("Tuple metadata access") {
     using m = metadata<type_list<alpha_, beta_>,
                        type_map<property<alpha_, double>, property<gamma_, char>>>;
     auto t = make_tagged_tuple<m>(value_field<alpha_>(2), value_field<beta_>(3.2));
+    CHECK(has_tag<alpha_>(t));
+    CHECK(has_tag<beta_>(t));
+    CHECK(not has_tag<gamma_>(t));
 }
 
 // TEST_CASE("basic type printing") { CHECK(type_to_string<alpha_>() == "alpha_"); }

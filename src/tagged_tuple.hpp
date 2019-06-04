@@ -156,3 +156,13 @@ auto make_tagged_tuple(TVPairs&&... pairs) {
 // type of field
 template <class Tag, class TTuple>
 using field_type = map_element_t<Tag, field_map_t<TTuple>>;
+
+template <class Tag, class MD, class... Fields>
+constexpr bool has_tag(const tagged_tuple<MD, Fields...>&) {
+    return metadata_has_tag<Tag, MD>::value;
+}
+
+template <class Tag, class MD, class... Fields>
+constexpr bool has_property(const tagged_tuple<MD, Fields...>&) {
+    return metadata_has_property<Tag, MD>::value;
+}
