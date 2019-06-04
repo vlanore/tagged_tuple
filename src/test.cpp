@@ -37,7 +37,7 @@ struct beta_ {};
 struct gamma_ {};
 struct delta_ {};
 
-TEST_CASE("Direct usage of tagged_tuple_t") {
+TEST_CASE("Constructors and get (basic usage)") {
     using my_tuple_t = tagged_tuple<no_metadata, field<alpha_, int>, field<beta_, double>,
                                     field<gamma_, std::string>>;
     struct my_struct {
@@ -47,15 +47,21 @@ TEST_CASE("Direct usage of tagged_tuple_t") {
     };
 
     CHECK(sizeof(my_tuple_t) == sizeof(my_struct));
+    CHECK(is_tagged_tuple<my_tuple_t>::value);
+    CHECK(not is_tagged_tuple<my_struct>::value);
 
     my_tuple_t my_tuple;
     my_tuple.data = std::make_tuple(2, 3.0, "hello");
     CHECK(get<alpha_>(my_tuple) == 2);
-    // CHECK(get<beta_>(my_tuple) == "hello");
+    CHECK(get<gamma_>(my_tuple) == "hello");
 
-    // const auto& my_const_tuple = my_tuple;
-    // CHECK(get<alpha_>(my_const_tuple) == 2);
-    // CHECK(get<beta_>(my_const_tuple) == "hello");
+    const auto& my_const_tuple = my_tuple;
+    CHECK(get<alpha_>(my_const_tuple) == 2);
+    CHECK(get<gamma_>(my_const_tuple) == "hello");
+
+    my_tuple_t my_tuple2{tuple_construct(), 4, 3.2, "hi"};
+    CHECK(get<alpha_>(my_tuple2) == 4);
+    CHECK(get<gamma_>(my_tuple2) == "hi");
 }
 
 // TEST_CASE("tagged_tuple typedef") {

@@ -26,6 +26,7 @@ license and that you accept its terms.*/
 
 #pragma once
 
+#include <memory>
 #include "minimpl/src/type_map.hpp"
 
 template <class T, class U>
@@ -47,8 +48,27 @@ struct tagged_tuple {
 };
 
 //==================================================================================================
+template <class T>
+struct is_tagged_tuple : std::false_type {};
+
+template <class MD, class... Fields>
+struct is_tagged_tuple<tagged_tuple<MD, Fields...>> : std::true_type {};
+
+//==================================================================================================
+template <class T>
+struct is_unique_ptr : std::false_type {};
+
+template <class T>
+struct is_unique_ptr<std::unique_ptr<T>> : std::true_type {};
+
+//==================================================================================================
 template <class Key, class MD, class... Fields>
 map_element_t<Key, type_map<Fields...>>& get(tagged_tuple<MD, Fields...>& t) {
+    return get<map_element_index<Key, type_map<Fields...>>::value>(t.data);
+}
+
+template <class Key, class MD, class... Fields>
+const map_element_t<Key, type_map<Fields...>>& get(const tagged_tuple<MD, Fields...>& t) {
     return get<map_element_index<Key, type_map<Fields...>>::value>(t.data);
 }
 
@@ -56,60 +76,6 @@ map_element_t<Key, type_map<Fields...>>& get(tagged_tuple<MD, Fields...>& t) {
 //     using namespace minimpl;
 // };
 // using std::tuple;
-
-//==================================================================================================
-// Tagged tuple class
-
-// struct TaggedTuple {};
-// struct ForwardToTupleConstructor {};
-
-// // tagged tuple class (just a tuple wrapper with added tags and static funcs)
-// template <class Fields = minimpl::map<>, class Tags = minimpl::list<>,
-//           class Properties = minimpl::map<>>
-// struct tagged_tuple_t : TaggedTuple {
-//     static_assert(minimpl::is_map<Fields>::value, "Fields should be a map");
-//     static_assert(minimpl::is_list<Tags>::value, "Tags should be a list");
-//     static_assert(minimpl::is_map<Properties>::value, "Properties should be a map");
-
-//     using tuple_t = typename minimpl::map_value_list_t<Fields>::tuple;
-//     using fields = Fields;
-//     using tags = Tags;
-//     using properties = Properties;
-
-//     tuple_t data;
-
-//     tagged_tuple_t() = default;
-
-//     template <class... TupleConstructorArgs>
-//     explicit tagged_tuple_t(ForwardToTupleConstructor, TupleConstructorArgs&&... args)
-//         : data(std::forward<TupleConstructorArgs>(args)...) {}
-// };
-
-// //==================================================================================================
-// // is_tagged_tuple type traits
-
-// template <class T>
-// using is_tagged_tuple = std::is_base_of<TaggedTuple, T>;
-
-// namespace helper {
-//     template <class... T>
-//     constexpr bool select_ttuple_ptr(box<std::unique_ptr<tagged_tuple_t<T...>>>) {
-//         return true;
-//     }
-
-//     template <class... T>
-//     constexpr bool select_ttuple_ptr(box<tagged_tuple_t<T...>>) {
-//         return true;
-//     }
-
-//     template <class T>
-//     constexpr bool select_ttuple_ptr(box<T>) {
-//         return false;
-//     }
-// };  // namespace helper
-
-// template <class T>
-// constexpr bool is_tagged_tuple_or_ptr = helper::select_ttuple_ptr(minimpl::box<T>());
 
 // //==================================================================================================
 // // get element from tag
