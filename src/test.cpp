@@ -122,17 +122,11 @@ TEST_CASE("field type") {
     CHECK((std::is_same<beta_t, double>::value));
 }
 
-// TEST_CASE("recursive tagged tuple") {
-//     auto inner = make_tagged_tuple(value_field<alpha_>(2));
-//     auto outer = make_tagged_tuple(value_field<beta_>(inner));
-//     CHECK((get<beta_, alpha_>(outer) == 2));
-// }
-
-// TEST_CASE("is_tagged_tuple") {
-//     using tuple_t = tagged_tuple<field<alpha_, int>, field<beta_, double>>;
-//     CHECK(is_tagged_tuple<tuple_t>::value);
-//     CHECK(!is_tagged_tuple<double>::value);
-// }
+TEST_CASE("recursive tagged tuple") {
+    auto inner = make_tagged_tuple(value_field<alpha_>(2));
+    auto outer = make_tagged_tuple(value_field<beta_>(inner));
+    CHECK((get<beta_, alpha_>(outer) == 2));
+}
 
 // // TEST_CASE("basic type printing") { CHECK(type_to_string<alpha_>() == "alpha_"); }
 

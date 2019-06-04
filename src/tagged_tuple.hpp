@@ -74,6 +74,16 @@ const auto& get(const tagged_tuple<MD, Fields...>& t) {
     return deref_if_ptr(get<index>(t.data));
 }
 
+template <class FirstKey, class SecondKey, class... Rest, class MD, class... Fields>
+auto& get(tagged_tuple<MD, Fields...>& t) {
+    return get<SecondKey, Rest...>(get<FirstKey>(t));
+}
+
+template <class FirstKey, class SecondKey, class... Rest, class MD, class... Fields>
+const auto& get(const tagged_tuple<MD, Fields...>& t) {
+    return get<SecondKey, Rest...>(get<FirstKey>(t));
+}
+
 //==================================================================================================
 namespace helper {
     template <class Tag, class Type, class MD, class... Fields, size_t... Is>
