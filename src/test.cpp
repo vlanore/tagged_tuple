@@ -90,29 +90,29 @@ TEST_CASE("Test with unique_ptrs") {
     CHECK(get<gamma_>(t2) == "hello");
 }
 
-// TEST_CASE("make_tagged_tuple") {
-//     auto t1 = make_tagged_tuple(value_field<alpha_>(3),
-//                                 value_field<beta_>(std::make_unique<double>(3.2)));
-//     CHECK(get<alpha_>(t1) == 3);
-//     CHECK(get<beta_>(t1) == 3.2);
+TEST_CASE("make_tagged_tuple") {
+    auto t1 = make_tagged_tuple(value_field<alpha_>(3),
+                                value_field<beta_>(std::make_unique<double>(3.2)));
+    CHECK(get<alpha_>(t1) == 3);
+    CHECK(get<beta_>(t1) == 3.2);
 
-//     auto t2 = make_tagged_tuple(value_field<alpha_>(7), unique_ptr_field<beta_>(7.2));
-//     CHECK(get<alpha_>(t2) == 7);
-//     CHECK(get<beta_>(t2) == 7.2);
-// }
+    auto t2 = make_tagged_tuple(value_field<alpha_>(7), unique_ptr_field<beta_>(7.2));
+    CHECK(get<alpha_>(t2) == 7);
+    CHECK(get<beta_>(t2) == 7.2);
+}
 
-// TEST_CASE("make_tagged_tuple ref/nonref/move") {
-//     auto c = std::make_unique<double>(3);
-//     int a{17}, b{19};
-//     auto t = make_tagged_tuple(value_field<alpha_>(a), ref_field<beta_>(b),
-//                                unique_ptr_field<struct gamma_>(21), move_field<delta_>(c));
-//     a = 7;
-//     b = 9;
-//     CHECK(get<alpha_>(t) == 17);
-//     CHECK(get<beta_>(t) == 9);
-//     CHECK(get<gamma_>(t) == 21);
-//     CHECK(get<delta_>(t) == 3);
-// }
+TEST_CASE("make_tagged_tuple ref/nonref/move") {
+    auto c = std::make_unique<double>(3);
+    int a{17}, b{19};
+    auto t = make_tagged_tuple(value_field<alpha_>(a), ref_field<beta_>(b),
+                               unique_ptr_field<gamma_>(21), move_field<delta_>(c));
+    a = 7;
+    b = 9;
+    CHECK(get<alpha_>(t) == 17);
+    CHECK(get<beta_>(t) == 9);
+    CHECK(get<gamma_>(t) == 21);
+    CHECK(get<delta_>(t) == 3);
+}
 
 // TEST_CASE("type_of") {
 //     using tuple_t = tagged_tuple<field<alpha_, int>, field<beta_, double>>;
