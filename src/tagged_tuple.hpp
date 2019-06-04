@@ -149,11 +149,9 @@ auto make_tagged_tuple(TVPairs&&... pairs) {
 // template <class TTuple, class Tag>
 // using ttuple_has_tag = minimpl::list_contains<typename TTuple::tags, Tag>;
 
-// // type of field
-// template <class TTuple, class Tag>
-// using field_type =
-//     std::tuple_element_t<minimpl::map_element_index<typename TTuple::fields, Tag>::value,
-//                          typename TTuple::tuple_t>;
+// type of field
+template <class Tag, class TTuple>
+using field_type = map_element_t<Tag, field_map_t<TTuple>>;
 
 // // get property
 // template <class TTuple, class Tag>

@@ -26,6 +26,7 @@ license and that you accept its terms.*/
 
 #pragma once
 
+#include <assert.h>
 #include <memory>
 
 // template <class T>
@@ -42,11 +43,13 @@ auto& deref_if_ptr(T& x) {
 
 template <class T>
 auto& deref_if_ptr(std::unique_ptr<T>& x) {
+    assert(x.get() != nullptr);
     return *x;
 }
 
 template <class T>
 auto& deref_if_ptr(T* x) {
+    assert(x != nullptr);
     return *x;
 }
 
@@ -57,10 +60,12 @@ const auto& deref_if_ptr(const T& x) {
 
 template <class T>
 const auto& deref_if_ptr(const std::unique_ptr<T>& x) {
+    assert(x.get() != nullptr);
     return *x;
 }
 
 template <class T>
 const auto& deref_if_ptr(const T* x) {
+    assert(x != nullptr);
     return *x;
 }

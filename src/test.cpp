@@ -114,13 +114,13 @@ TEST_CASE("make_tagged_tuple ref/nonref/move") {
     CHECK(get<delta_>(t) == 3);
 }
 
-// TEST_CASE("type_of") {
-//     using tuple_t = tagged_tuple<field<alpha_, int>, field<beta_, double>>;
-//     using alpha_t = field_type<tuple_t, alpha_>;
-//     using beta_t = field_type<tuple_t, beta_>;
-//     CHECK((std::is_same<alpha_t, int>::value));
-//     CHECK((std::is_same<beta_t, double>::value));
-// }
+TEST_CASE("field type") {
+    using tuple_t = tagged_tuple<no_metadata, field<alpha_, int>, field<beta_, double>>;
+    using alpha_t = field_type<alpha_, tuple_t>;
+    using beta_t = field_type<beta_, tuple_t>;
+    CHECK((std::is_same<alpha_t, int>::value));
+    CHECK((std::is_same<beta_t, double>::value));
+}
 
 // TEST_CASE("recursive tagged tuple") {
 //     auto inner = make_tagged_tuple(value_field<alpha_>(2));
