@@ -29,6 +29,7 @@ license and that you accept its terms.*/
 
 #include <string>
 // #include "debug_tools.hpp"
+#include "fancy_syntax.hpp"
 #include "tagged_tuple.hpp"
 using std::string;
 
@@ -151,6 +152,18 @@ TEST_CASE("Tuple metadata access") {
     CHECK(has_tag<alpha_>(t));
     CHECK(has_tag<beta_>(t));
     CHECK(not has_tag<gamma_>(t));
+}
+
+TOKEN(t1);
+TOKEN(t2);
+struct t3 {};
+
+TEST_CASE("Fancy token/make syntax") {
+    auto a = std::make_unique<double>(3.2);
+    auto t = make_tagged_tuple(t1_ = std::move(a), t2_ = 3, unique_ptr_field<t3>(2.3));
+    CHECK(get<t1>(t) == 3.2);
+    CHECK(get<t2>(t) == 3);
+    CHECK(get<t3>(t) == 2.3);
 }
 
 // TEST_CASE("basic type printing") { CHECK(type_to_string<alpha_>() == "alpha_"); }

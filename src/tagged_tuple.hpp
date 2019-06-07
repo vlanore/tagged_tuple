@@ -122,6 +122,10 @@ struct TagValuePair<Tag, Type&> {
 template <class Tag, class Type>
 auto value_field(Type&& data) {
     using nonref_type = std::remove_reference_t<Type>;
+    static_assert(
+        std::is_copy_constructible<nonref_type>::value or std::is_rvalue_reference<Type&&>::value or
+            not std::is_class<nonref_type>::value,
+        "Trying to copy a non-copyable object into a field. Maybe you should move it instead.");
     return TagValuePair<Tag, nonref_type>{std::forward<Type>(data)};
 }
 
