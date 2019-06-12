@@ -38,3 +38,4 @@ license and that you accept its terms.*/
         }                                                                 \
     };                                                                    \
     constexpr auto name##_ = name();
+    
