@@ -154,8 +154,8 @@ TEST_CASE("Tuple metadata access") {
     CHECK(not has_tag<gamma_>(t));
 }
 
-TOKEN(t1);
-TOKEN(t2);
+TOKEN(t1)
+TOKEN(t2)
 struct t3 {};
 
 TEST_CASE("Fancy token/make syntax") {

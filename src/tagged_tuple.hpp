@@ -88,7 +88,7 @@ namespace helper {
         using result_t = tagged_tuple<MD, field<Tag, std::remove_reference_t<Type>>, Fields...>;
         return result_t(tuple_construct(), std::move(v), std::move(get<Is>(t.data))...);
     }
-};  // namespace helper
+}  // namespace helper
 
 template <class Tag, class Type, class MD, class... Fields>
 auto push_front(Type&& v, tagged_tuple<MD, Fields...>& t) {

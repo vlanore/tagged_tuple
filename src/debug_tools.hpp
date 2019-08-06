@@ -86,7 +86,7 @@ namespace helper {
                "}";
     }
 
-};  // namespace helper
+}  // namespace helper
 
 //==================================================================================================
 // handling references and unique pointers in a pretty way
@@ -106,7 +106,7 @@ namespace helper {
     std::string pretty_refs_and_pointers(utils::Type<T>) {
         return demangle(typeid(T).name());
     }
-};  // namespace helper
+}  // namespace helper
 
 //==================================================================================================
 // selection of type-to-string impl (ttuple or not)
@@ -122,7 +122,7 @@ namespace helper {
     std::string tagged_tuple_selector(std::false_type) {
         return helper::pretty_refs_and_pointers(utils::Type<T>());
     }
-};  // namespace helper
+}  // namespace helper
 
 template <class T>
 static std::string type_to_string() {
