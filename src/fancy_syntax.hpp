@@ -26,6 +26,8 @@ license and that you accept its terms.*/
 
 #pragma once
 
+#include <string>
+
 #define TOKEN(name)                                                       \
     struct name {                                                         \
         template <class... Args>                                          \
@@ -36,6 +38,6 @@ license and that you accept its terms.*/
         auto& operator()(Model& m) const {                                \
             return get<name>(m);                                          \
         }                                                                 \
+        static std::string to_string() { return #name; }                   \
     };                                                                    \
     constexpr auto name##_ = name();
-    
