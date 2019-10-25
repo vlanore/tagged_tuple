@@ -3,4 +3,4 @@
 	url = https://github.com/vlanore/minimpl.git
 [submodule "utils/bayes_utils"]
 	path = utils/bayes_utils
-	url = git@github.com:vlanore/bayes_utils.git
+	url = https://github.com/vlanore/bayes_utils.git
